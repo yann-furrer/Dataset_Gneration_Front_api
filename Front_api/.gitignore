@@ -1,0 +1,10 @@
+__pycache__
+/generator/__pycache__
+/api_config/__pycache__
+/utils/__pycache__
+/config/inverted_rules_config.json
+core/test.py
+__pycache__/api.cpython-312.pyc
+api_config/__pycache__/auth_provider.cpython-312.pyc
+api_config/__pycache__/utils_api.cpython-312.pyc
+.env
