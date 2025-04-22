@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api.routes import gpt, sse, dev_token, user, dataset
+from api.routes import sse, dev_token, user, dataset
 
 app = FastAPI()
 
