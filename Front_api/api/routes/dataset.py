@@ -1,50 +1,25 @@
 
-import os , sys, json
+import os , sys, json, uuid
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import  HTTPBearer
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+from core.queue_config import send_message_to_celery_queue, TaskSchema
 from core.checking import check_user_limit_credit, get_session_token
 from core.user import insert_subscription
 #import pour la table dataset config
-from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset
+from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset, insert_rules_config_info, insert_dataset_config_and_rules_config_info
 #import pour la table Dataset
-from core.dataset import insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical
+from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical
+
+
 router = APIRouter()
 security = HTTPBearer()  
 
 # cette route ne génère pas de dataset mais elle permet de sauvegarder la configuration du dataset
 # pour l'utilisateur
 # pas besoinde vérifier le quota de l'utilisateur car il n'y a pas de génération de dataset
-@router.post("/dataset/save_dataset_config")
-async def save_dataset_config(request: Request , userId : str = Depends(get_session_token)):
-    """
-    Save dataset to user
-    """
-    body = await request.json()
-    datasetId = body.get("datasetId" , "")
-    yamlName = body.get("yamlName" , "")
-    yamlContent = body.get("yamlContent" , "")
-    draftResult = body.get("draftResult" , "")
-    nbRows = body.get("nbRows" , "")
-    body_value_list = [datasetId, yamlName, yamlContent, draftResult, nbRows]
-
-    if any(value == "" for value in body_value_list):
-        raise HTTPException(
-            status_code=400,
-            detail="Missing required fields in the request body",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    result_request = insert_dataset_config_info(datasetId, userId, yamlName, json.dumps(yamlContent), json.dumps(draftResult), nbRows)
-
-    if result_request == True:
-        return {"message": "Dataset saved!"}
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Error when saving dataset, maybe duplicate datasetId",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
+ 
 
 # cette route permet de récupérer la configuration du dataset
 # elle ne génère pas de dataset donc pas besoin de vérifier le quota de l'utilisateur
@@ -162,3 +137,82 @@ async def get_dataset_config_historical(request : Request, userId : str = Depend
             detail="Error while getting dataset historical",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+
+@router.post("/dataset/save_dataset_config")
+async def save_dataset_config_and_rules_config(request: Request , userId : str = Depends(get_session_token)):
+    """
+    save_dataset_config2
+
+    """
+    celery_queue_id =uuid.uuid4()
+    body = await request.json()
+    yamlName = body.get("yamlName" , None)
+    client_id = userId
+    end_format = body.get("end_format" , None)
+    yamlContent = body.get("yaml_content" , None)
+    rules = body.get("rules" , None)
+    rulesId = body.get("rulesId" , None)
+    rulesName = body.get("rulesName" , None)
+    rulesContent = body.get("rulesContent" , None)
+    dataset_config_id = body.get("dataset_config_id" , None)
+    campaignid = body.get("campaignid" , None) # pour l'instant on ne prend pas en compte le campaignid
+    nbRows = body.get("nbRows" , None)
+    body_value_list = [yamlName, client_id, end_format, yamlContent, dataset_config_id, nbRows]
+
+    # print("yamlName",yamlName)
+    # print("client_id",client_id)
+    # print("end_format",end_format)
+    # print("yaml_content",yaml_content)
+    # print("dataset_config_id",dataset_config_id)
+    # print("nbRows",nbRows)
+
+    draftResult = {"test": "test"}
+    if any(value == None for value in body_value_list):
+        raise HTTPException(
+            status_code=400,
+            detail="Missing required fields in the request body or None value",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+#a faire 
+    # result_request = insert_dataset_config_and_rules_config_info(dataset_config_id, userId, yamlName, yamlContent, draftResult, nbRows, rulesId, rulesName, rulesContent, campaignid)
+    
+
+        # Ajout de la tache dans la queue rabbitmq
+    # send_message_to_celery_queue(TaskSchema(id=celery_queue_id, function="preprocessing_generation", dataset_name=dataset_name, client_id=client_id, end_format=end_format, yaml_content=yaml_content, rules=rules, dataset_config=dataset_config))
+    return {"message": "GSave Config and Rules Config!"}
+
+
+
+
+@router.post("/dataset/generate_dataset")
+async def generate_dataset(request : Request, userId : str = Depends(get_session_token)):
+    """
+    generate_dataset
+
+    """
+    celery_queue_id =uuid.uuid4()
+    body = await request.json()
+    dataset_name = body.get("dataset_name" , "nom du dataset par defaut")
+    end_format = body.get("end_format" , None)
+    yamlContent = body.get("yaml_content" , None)
+    rulesContent = body.get("rulesContent" , None)
+    dataset_config_id = body.get("dataset_config_id" , None)
+    campaignid = body.get("campaignid" , None) # pour l'instant on ne prend pas en compte le campaignid
+    nbRows = body.get("nbRows" , 1)
+    function = "preprocessing_generation"
+    body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
+
+  
+    inserting_dataset_info(dataset_config_id, userId, campaignid, "waiting",  nbRows, dataset_name)
+    draftResult = {"test": "test"}
+    if any(value == None for value in body_value_list):
+        raise HTTPException(
+            status_code=400,
+            detail="Missing required fields in the request body or None value",
+            headers={"WWW-Authenticate": "Bearer"},
+        )    
+
+        # Ajout de la tache dans la queue rabbitmq
+    send_message_to_celery_queue(TaskSchema(id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id))
+    return {"message": "GSave Config and Rules Config!"}

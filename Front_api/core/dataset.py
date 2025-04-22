@@ -1,9 +1,9 @@
-import os , sys
+import os , sys, json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import  HTTPException
 from fastapi.security import HTTPBearer
-#datasetConfig
-from database.queries.dataset import insert_dataset_config, select_dataset_config, update_finished_dataset_info, select_dataset_historical_config_offset
+#datasetConfig and rulesConfig
+from database.queries.dataset import insert_dataset_config, select_dataset_config, update_finished_dataset_info, select_dataset_historical_config_offset, insert_rules_config
 #dataset
 from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset
 
@@ -28,6 +28,42 @@ def insert_dataset_config_info(datasetId: str, userId: str,  yamlName: str, yaml
             detail="Error while inserting dataset config , try again your yaml is not saved, maybe duplicate datasetId",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def insert_rules_config_info(rulesId: str, userId: str,  rulesName: str, rulesContent: str, datasetConfigId: int, campaignId: str = None) -> bool:
+    """
+    save rules config
+    """
+    reuslt_request = insert_rules_config(rulesId, userId,  rulesName, rulesContent, datasetConfigId, campaignId)
+    if reuslt_request == True:
+        return True
+    else:
+        HTTPException(
+            status_code=400,
+            detail="Error while inserting rules config",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def insert_dataset_config_and_rules_config_info(datasetConfigId: str, userId: str,  yamlName: str, yamlContent: dict, draftResult: dict, nbRows: int, rulesId: str, rulesName: str, rulesContent: str, campaignId: str = None) -> bool:
+    """
+    save dataset config
+    """
+    result_request_dataset_config = insert_dataset_config(datasetConfigId, userId, yamlName, json.dumps(yamlContent), json.dumps(draftResult), nbRows)
+    result_rules_config = None
+    print("rulesContent", rulesContent)
+    if rulesContent != None: # si rulesContent est None alors on ne fait rien
+        result_rules_config = insert_rules_config(rulesId, userId,  rulesName, json.dumps(rulesContent), datasetConfigId, campaignId)
+
+    if result_request_dataset_config == True and result_rules_config == True:
+        return True
+    else:
+        HTTPException(
+            status_code=400,
+            detail="Error while inserting dataset config or dataset rules config , try again your yaml is not saved, maybe duplicate datasetId",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
 
 def get_dataset_config_info(datasetId: str, userId: str) -> dict:
     """
@@ -65,13 +101,14 @@ def select_dataset_for_historical(userId: str, offset: int) -> dict:
 
 
 
+
 # requete sur la table dataset
 
-def insert_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = None, status: str = "waiting") -> bool:
+def inserting_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = None,  status: str = "waiting", nbRows: int = 0, datasetName: str = "defaut name") -> bool:
     """
     Insert new dataset info in dataset
     """
-    result_request = insert_dataset_info(datasetConfigId, ownerId, campaingId, status)
+    result_request = insert_dataset_info(datasetConfigId, ownerId, campaingId, status, nbRows, datasetName)
 
     if result_request == True:
         return True

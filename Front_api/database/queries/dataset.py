@@ -10,9 +10,9 @@ from config import *
 INSERT_ON_CONFLICT_DATASET_CONFIG = """
 INSERT INTO public."DatasetConfig"(
 	 "datasetId", "userId", "yamlName", "yamlContent", "draftResult", "nbRows", "updatedAt")
-	VALUES ( :datasetId, :userId, :yamlName, :yamlContent, :draftResult , :nbRows, now());
-    ON CONFLICT (datasetId) DO UPDATE
-    SET yamlName = :yamlName, yamlContent = :yamlContent, draftResult = :draftResult , nbRows = :nbRows, updatedAt = now();
+	VALUES ( :datasetId, :userId, :yamlName, :yamlContent, :draftResult , :nbRows, now())
+    ON CONFLICT ("datasetId") DO UPDATE
+    SET "yamlName" = :yamlName, "yamlContent" = :yamlContent, "draftResult" = :draftResult , "nbRows" = :nbRows, "updatedAt" = now();
     """
 # Par defaut on laisse le champs rulesId et campaingId vide car il sera ajouter dès la creation de celui ci dans le front
 # cela evite de complexifier la requete pour ajouter les rules
@@ -27,6 +27,55 @@ def insert_dataset_config(datasetId: str, userId: str,  yamlName: str, yamlConte
     
 # insert_dataset_config("kzejfklgjreklg",  "cm97k3e4y0000w1fx7081kk5e"
 # ,"yaml titre dataset", '{"yann": "dataset"}','{"ebauche": "dataset"}', 12345987873)
+
+
+
+INSERT_ON_CONFLICT_RULES_CONFIG = """
+INSERT INTO public."RulesConfig"(
+	"rulesId", "userId", "rulesName", "rulesContent", "datasetConfigId")
+	VALUES ( :rulesId, :userId, :rulesName, :rulesContent, :datasetConfigId)
+    ON CONFLICT ("rulesId") DO UPDATE
+    SET "rulesName" = :rulesName, "rulesContent" = :rulesContent;
+    """
+
+INSERT_ON_CONFLICT_RULES_CONFIG_WITH_CAMPAIGN = """
+INSERT INTO public."RulesConfig"(
+	"rulesId", "userId", "rulesName", "rulesContent", "datasetConfigId", "campaignId")
+	VALUES ( :rulesId, :userId, :rulesName, :rulesContent, :datasetConfigId, "campaignId")
+    ON CONFLICT ("rulesId") DO UPDATE
+    SET "rulesName" = :rulesName, "rulesContent" = :rulesContent, "campaignId" = :campaignId;
+    """
+
+# INSERT_RULES_CONFIG = """
+# INSERT INTO public."RulesConfig"(
+# 	 "rulesId", "userId", "rulesName", "rulesContent", "datasetConfigId")
+# 	VALUES ( :rulesId, :userId, :rulesName, :rulesContent, :datasetConfigId);
+    
+#     """
+# INSERT_RULES_CONFIG_WITH_CAMPAIGN = """
+# INSERT INTO public."RulesConfig"(
+# 	 "rulesId", "userId", "rulesName", "rulesContent", "datasetConfigId", "campaignId")
+# 	VALUES ( :rulesId, :userId, :rulesName, :rulesContent, :datasetConfigId , :campaignId);
+#     ON CONFLICT (datasetId) DO UPDATE
+#     SET yamlName = :yamlName, yamlContent = :yamlContent, draftResult = :draftResult , nbRows = :nbRows, updatedAt = now();
+#     """
+
+def insert_rules_config(rulesId: str, userId: str,  rulesName: str, rulesContent: str, datasetConfigId: int, campaignId: str = None) -> bool:  
+    try:
+        if campaignId == None:
+            campaignId = ""
+            session.execute(text(INSERT_ON_CONFLICT_RULES_CONFIG), {"rulesId": rulesId, "userId": userId, "rulesName": rulesName, "rulesContent": rulesContent, "datasetConfigId": datasetConfigId})
+            session.commit()
+            return True
+        else:
+            session.execute(text(INSERT_ON_CONFLICT_RULES_CONFIG_WITH_CAMPAIGN), {"rulesId": rulesId, "userId": userId, "rulesName": rulesName, "rulesContent": rulesContent, "datasetConfigId": datasetConfigId, "campaignId": campaignId})
+            session.commit()
+            return True
+        
+    except Exception as e:
+        print("Error while inserting rules config", e)
+        return False
+
 
 
 
@@ -46,16 +95,24 @@ def select_dataset_config(datasetId: str, userId: str) -> bool:
 
 INSERT_DATASET_INFO = """
 INSERT INTO public."Dataset"(
-	"nbRows", "datasetConfigId", "ownerId", "campaignId", "status")
-	VALUES ( :nbRows", :datasetConfigId, :ownerId, :campaignId, :status);
+	"nbRows", "datasetConfigId", "ownerId", "status", "datasetName")
+	VALUES ( :nbRows, :datasetConfigId, :ownerId, :status, :datasetName);
     """
 
-def insert_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = None, status: str = "waiting") -> bool:
+INSERT_DATASET_INFO_WITH_COMPAIGN = """
+INSERT INTO public."Dataset"(
+	"nbRows", "datasetConfigId", "ownerId", "campaignId", "status", "datasetName")
+	VALUES ( :nbRows, :datasetConfigId, :ownerId, :campaignId, :status, :datasetName);
+    """
+
+def insert_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = None, status: str = "waiting", nbRows: int = 0, datasetName: str = None) -> bool:
     try:
         if campaingId == None:
-            campaingId = ""
-        session.execute(text(INSERT_DATASET_INFO), {"datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status})
-        session.commit()
+            session.execute(text(INSERT_DATASET_INFO), {"datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
+            session.commit()
+        else:
+            session.execute(text(INSERT_DATASET_INFO_WITH_COMPAIGN), {"datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
+            session.commit()
         return True
     except Exception as e:
         print("Error while inserting dataset info", e)
@@ -182,3 +239,5 @@ def select_dataset_historical_config_offset(userId: str, offset: int) -> dict:
     except Exception as e:        
         print(f"Error while selecting dataset historical {userId}", e)
         return False
+    
+
