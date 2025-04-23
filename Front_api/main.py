@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 # Inclusion des routes
-app.include_router(gpt.router)
+# app.include_router(gpt.router)
 app.include_router(sse.router)
 app.include_router(user.router)
 app.include_router(dev_token.router)
