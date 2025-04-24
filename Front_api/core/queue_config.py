@@ -82,7 +82,7 @@ def send_message_to_celery_queue(message_body: TaskSchema):
     connection.close()
 
 
-# # # Example to call your mock function
+# # # Example to call your mock function for test queue
 # mock_task = {
 #     "function": "mock"  
 # }
