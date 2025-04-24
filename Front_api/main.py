@@ -28,3 +28,8 @@ app.include_router(sse.router)
 app.include_router(user.router)
 app.include_router(dev_token.router)
 app.include_router(dataset.router)
+
+
+@app.get("/welcome")
+async def welcome():
+    return {"message": "Welcome to the FastAPI API"}
