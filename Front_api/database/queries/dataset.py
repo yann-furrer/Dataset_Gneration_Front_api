@@ -95,23 +95,23 @@ def select_dataset_config(datasetId: str, userId: str) -> bool:
 
 INSERT_DATASET_INFO = """
 INSERT INTO public."Dataset"(
-	"nbRows", "datasetConfigId", "ownerId", "status", "datasetName")
-	VALUES ( :nbRows, :datasetConfigId, :ownerId, :status, :datasetName);
+	"id", "nbRows", "datasetConfigId", "ownerId", "status", "datasetName")
+	VALUES ( :id, :nbRows, :datasetConfigId, :ownerId, :status, :datasetName);
     """
 
 INSERT_DATASET_INFO_WITH_COMPAIGN = """
 INSERT INTO public."Dataset"(
-	"nbRows", "datasetConfigId", "ownerId", "campaignId", "status", "datasetName")
-	VALUES ( :nbRows, :datasetConfigId, :ownerId, :campaignId, :status, :datasetName);
+	"id", "nbRows", "datasetConfigId", "ownerId", "campaignId", "status", "datasetName")
+	VALUES ( :id, :nbRows, :datasetConfigId, :ownerId, :campaignId, :status, :datasetName);
     """
 
-def insert_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = None, status: str = "waiting", nbRows: int = 0, datasetName: str = None) -> bool:
+def insert_dataset_info(dataset_row_id: str, datasetConfigId: int, ownerId: str, campaingId: str = None, status: str = "waiting", nbRows: int = 0, datasetName: str = None) -> bool:
     try:
         if campaingId == None:
-            session.execute(text(INSERT_DATASET_INFO), {"datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
+            session.execute(text(INSERT_DATASET_INFO), {"id": dataset_row_id, "datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
             session.commit()
         else:
-            session.execute(text(INSERT_DATASET_INFO_WITH_COMPAIGN), {"datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
+            session.execute(text(INSERT_DATASET_INFO_WITH_COMPAIGN), { "id": dataset_row_id, "datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
             session.commit()
         return True
     except Exception as e:
@@ -120,31 +120,50 @@ def insert_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = No
     
     
 UPDATE_FINISHED_DATASET_INFO = """ 
-UPDATE public."Dataset"(
-SET "s3Url" = :s3Url, 
-    "FinishedAt" = :FinishedAt,
+UPDATE public."Dataset"
+SET 
+    "FinishedAt" = NOW(),
     "generationError" = :generationError,
-    "status" = :status
-    "TimeToGenerate" = (SELECT "createdAt" FROM "DatasetConfig" WHERE "datasetId" = :datasetId),
-    "generationError" = :generationError,
-WHERE "datasetId" = :datasetId;
+    "status" = :status,
+     "TimeToGenerate" = (ROUND(EXTRACT(EPOCH FROM (NOW() - (SELECT "createdAt" FROM public."Dataset" WHERE "id" = :id)))) / 60)::integer
+WHERE "id" = :id;
 """
 
-def update_finished_dataset_info(datasetId: str, s3Url: str, FinishedAt: str, generationError: str, status: str) -> bool:
+def update_finished_dataset_info(row_id: str, generationError: str, status: str) -> bool:
     try:
-        session.execute(text(UPDATE_FINISHED_DATASET_INFO), {"datasetId": datasetId, "s3Url": s3Url, "FinishedAt": FinishedAt, "generationError": generationError, "status": status})
+        session.execute(text(UPDATE_FINISHED_DATASET_INFO), {"id": row_id, "generationError": generationError, "status": status})
+        session.commit()
+        return True
+    except Exception as e:
+        print("Error while updating dataset info", e)
+        return False
+    
+
+UPDATE_DATASET_STATUS_INFO = """ 
+UPDATE public."Dataset"
+SET
+    "status" = :status
+WHERE "id" = :id;
+"""
+
+def update_dataset_status_info(row_id: str, status: str) -> bool:
+    try:
+        print("update_dataset_status_info")
+        print("row_id -->", row_id)
+        print("status -->", status)
+        session.execute(text(UPDATE_DATASET_STATUS_INFO), {"id": row_id, "status": status})
         session.commit()
         return True
     except Exception as e:
         print("Error while updating dataset info", e)
         return False
 
-UPDATE_STATUS_DATASET_INFO = """ 
-UPDATE public."Dataset"(
-SET "status" = :status
-    "generationError" = :generationError,
 
-WHERE "datasetId" = :datasetId;
+UPDATE_STATUS_DATASET_INFO = """ 
+UPDATE public."Dataset"
+SET "status" = :status
+    "generationError" = :generationError
+WHERE "id" = :id;   
 """
 
 def update_status_dataset_info(datasetId: str, status: str, generationError: str= None) -> bool:

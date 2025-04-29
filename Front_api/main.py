@@ -11,6 +11,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",  # Remplacez par votre domaine frontend en développement
     "https://votredomaine.com",  # Remplacez par votre domaine frontend en production
+    "https://d8bd-2a02-842a-41-2201-b8a0-4372-4c23-4b90.ngrok-free.app"
     # Vous pouvez ajouter d'autres origines si nécessaire
 ]
 

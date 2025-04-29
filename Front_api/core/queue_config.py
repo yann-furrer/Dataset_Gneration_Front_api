@@ -15,6 +15,7 @@ CELERY_QUEUE_NAME = "celery"
 #Schema de contenue de la tache
 class TaskSchema(TypedDict):
     id: str
+    dataset_id_row: str
     function: int
     dataset_name: str
     client_id: str
@@ -25,6 +26,7 @@ class TaskSchema(TypedDict):
 # Utilisation
 task: TaskSchema = {
     "id": 1,
+    "dataset_id_row": "uuid",
     "name": "Jean Dupont",
     "email": "jean@example.com",
     "active": True,

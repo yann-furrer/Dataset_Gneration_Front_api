@@ -2,7 +2,7 @@ import os , sys, uuid
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
-from database.queries.security import check_session_token, check_user_api_token, check_user_suscription_limit
+from database.queries.security import check_session_token, check_user_api_token, check_user_suscription_limit, select_dev_token_info
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
@@ -28,8 +28,31 @@ def generate_user_api_token() -> str:
     return token
 
 
+def check_user_api_token(token : str, nb_rows_to_generate : int) -> bool:
+    """
+    Vérifie si le token est valide
+    """
+    try :
+        token_info = select_dev_token_info(token)
+        if token_info == False:
+            raise HTTPException(
+                status_code=400,
+                detail=" Token not found or invalid",
+                headers={"WWW-Authenticate": "Bearer"},
+            )    
+        return True
+    
+    except Exception as e:
+        print("error -->", e)
+        raise HTTPException(
+            status_code=401,
+            detail="User subscription not found or invalid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )   
 
-async def get_session_token(request: Request):
+
+
+async def get_session_token(request: Request) -> str:
     """
     Extrait le token de session du header 'sessiontoken'.
     """

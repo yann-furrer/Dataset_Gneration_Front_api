@@ -1,4 +1,5 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from typing import Any, Dict
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
 import asyncio
 import json
@@ -21,15 +22,24 @@ async def sse(user_id: str):
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-@router.post("/notify/{user_id}")
-async def notify(user_id: str, message: str):
-    if user_id in user_connections:
-        await user_connections[user_id].put(message)
-        return {"status": "Message envoyé"}
-    raise HTTPException(status_code=404, detail="Utilisateur non connecté")
 
-@router.post("/compute-done/")
-async def compute_done(user_id: str, background_tasks: BackgroundTasks):
-    message = f"Votre tâche est terminée, utilisateur {user_id} !"
-    background_tasks.add_task(notify, user_id=user_id, message=message)
-    return {"status": "Notification en cours"}
+
+
+
+@router.post("/sse/notify/{user_id}")
+async def notify(user_id: str, message: Dict[str, Any] = Body(...)):
+    print("user connected", user_connections)
+    if user_id not in user_connections:
+        raise HTTPException(status_code=404, detail="Utilisateur non connecté")
+    
+    
+    await user_connections[user_id].put(message)
+    return {"status": "success", "message": "Notification envoyée"}
+
+
+
+# @router.post("/compute-done/")
+# async def compute_done(user_id: str, background_tasks: BackgroundTasks):
+#     message = f"Votre tâche est terminée, utilisateur {user_id} !"
+#     background_tasks.add_task(notify, user_id=user_id, message=message)
+#     return {"status": "Notification en cours"}

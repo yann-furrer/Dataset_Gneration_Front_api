@@ -10,7 +10,7 @@ from core.user import insert_subscription
 #import pour la table dataset config
 from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset, insert_rules_config_info, insert_dataset_config_and_rules_config_info
 #import pour la table Dataset
-from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical
+from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical, update_finished_dataset, update_status_dataset
 
 
 router = APIRouter()
@@ -139,33 +139,34 @@ async def get_dataset_config_historical(request : Request, userId : str = Depend
         )
     
 
+  
+
 @router.post("/dataset/save_dataset_config")
 async def save_dataset_config_and_rules_config(request: Request , userId : str = Depends(get_session_token)):
     """
     save_dataset_config2
 
     """
-    celery_queue_id =uuid.uuid4()
     body = await request.json()
     yamlName = body.get("yamlName" , None)
     client_id = userId
     end_format = body.get("end_format" , None)
     yamlContent = body.get("yaml_content" , None)
-    rules = body.get("rules" , None)
-    rulesId = body.get("rulesId" , None)
-    rulesName = body.get("rulesName" , None)
+    # rules = body.get("rules" , None)
+    rulesId = body.get("rulesId" , "idrulestest123")
+    rulesName = body.get("rulesName" , "rule nom")
     rulesContent = body.get("rulesContent" , None)
     dataset_config_id = body.get("dataset_config_id" , None)
     campaignid = body.get("campaignid" , None) # pour l'instant on ne prend pas en compte le campaignid
     nbRows = body.get("nbRows" , None)
     body_value_list = [yamlName, client_id, end_format, yamlContent, dataset_config_id, nbRows]
 
-    # print("yamlName",yamlName)
-    # print("client_id",client_id)
-    # print("end_format",end_format)
-    # print("yaml_content",yaml_content)
-    # print("dataset_config_id",dataset_config_id)
-    # print("nbRows",nbRows)
+    print("yamlName",yamlName)
+    print("client_id",client_id)
+    print("end_format",end_format)
+    print("yaml_content",yamlContent)
+    print("dataset_config_id",dataset_config_id)
+    print("nbRows",nbRows)
 
     draftResult = {"test": "test"}
     if any(value == None for value in body_value_list):
@@ -175,7 +176,7 @@ async def save_dataset_config_and_rules_config(request: Request , userId : str =
             headers={"WWW-Authenticate": "Bearer"},
         )
 #a faire 
-    # result_request = insert_dataset_config_and_rules_config_info(dataset_config_id, userId, yamlName, yamlContent, draftResult, nbRows, rulesId, rulesName, rulesContent, campaignid)
+    result_request = insert_dataset_config_and_rules_config_info(dataset_config_id, userId, yamlName, yamlContent, draftResult, nbRows, rulesId, rulesName, rulesContent, campaignid)
     
 
         # Ajout de la tache dans la queue rabbitmq
@@ -192,6 +193,7 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
 
     """
     celery_queue_id =uuid.uuid4()
+    dataset_row_id = uuid.uuid4()
     body = await request.json()
     dataset_name = body.get("dataset_name" , "nom du dataset par defaut")
     end_format = body.get("end_format" , None)
@@ -200,11 +202,11 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
     dataset_config_id = body.get("dataset_config_id" , None)
     campaignid = body.get("campaignid" , None) # pour l'instant on ne prend pas en compte le campaignid
     nbRows = body.get("nbRows" , 1)
-    function = "preprocessing_generation"
+    function = body.get("function" , "mock") # description of the function to be executed on the celery queue
     body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
 
   
-    inserting_dataset_info(dataset_config_id, userId, campaignid, "waiting",  nbRows, dataset_name)
+    inserting_dataset_info(dataset_row_id ,dataset_config_id, userId, campaignid, "waiting",  nbRows, dataset_name)
     draftResult = {"test": "test"}
     if any(value == None for value in body_value_list):
         raise HTTPException(
@@ -214,5 +216,61 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
         )    
 
         # Ajout de la tache dans la queue rabbitmq
-    send_message_to_celery_queue(TaskSchema(id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id))
-    return {"message": "GSave Config and Rules Config!"}
+    send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id))
+    return {f"message": "Dataset {dataset_name} ajouter à queue !"}
+
+
+@router.post("/dataset/update_finished_dataset")
+#cette route est uniquement appellé par le back il faudra a terme verfier que c'est bien le back qui appelle
+async def update_finished_dataset_info(request: Request ):
+    """
+    update_finished_dataset
+
+    """
+    body = await request.json()
+    datasetId = body.get("datasetId" , None)
+    if datasetId == None:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing required fields in the request body",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    result_request = update_finished_dataset(datasetId, body.get("generationError" , "0"), body.get("status" , "unknown"))
+
+    if result_request != None:
+        return {"message": "Dataset updated !"}
+    else:
+        return HTTPException(
+            status_code=400,
+            detail="Error while updating dataset",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+
+@router.post("/dataset/update_dataset_status")
+#cette route est uniquement appellé par le back il faudra a terme verfier que c'est bien le back qui appelle
+async def update_dataset_status(request: Request ):
+    """
+    update_dataset_status
+
+    """
+    body = await request.json()
+    datasetId = body.get("datasetId" , None)
+    if datasetId == None:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing required fields in the request body",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    result_request = update_status_dataset(datasetId, body.get("status" , "unknown"))
+
+    if result_request == True:
+        return {"message": "Dataset updated !"}
+    else:
+        return HTTPException(
+            status_code=400,
+            detail="Error while updating dataset",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

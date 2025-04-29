@@ -5,6 +5,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from config import *
 
 
+
+SELECT_DEV_TOKEN = """
+SELECT  "quotaUsed", "price", "limit"  FROM public."API_handle" WHERE "token" = :token;
+"""
+
+def select_dev_token_info(token : str) -> bool:
+    try:
+        result = session.execute(text(SELECT_DEV_TOKEN), {"token": token})
+        row = result.fetchone()
+        return row
+    except Exception as error:
+        print("error -->",error)
+        return False
+
 # SELECT "userId", "quotaUsed", "price", "limit"  FROM public."API_handle" WHERE "token" = :token;
 # requete d'insertion des tokens
 INSERT_DEV_TOKEN = """

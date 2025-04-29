@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer
 #datasetConfig and rulesConfig
 from database.queries.dataset import insert_dataset_config, select_dataset_config, update_finished_dataset_info, select_dataset_historical_config_offset, insert_rules_config
 #dataset
-from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset
+from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset, update_dataset_status_info
 
 from utils.s3_handle import S3Manager
 
@@ -104,11 +104,11 @@ def select_dataset_for_historical(userId: str, offset: int) -> dict:
 
 # requete sur la table dataset
 
-def inserting_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str = None,  status: str = "waiting", nbRows: int = 0, datasetName: str = "defaut name") -> bool:
+def inserting_dataset_info(dataset_row_id, datasetConfigId: int, ownerId: str, campaingId: str = None,  status: str = "waiting", nbRows: int = 0, datasetName: str = "defaut name") -> bool:
     """
     Insert new dataset info in dataset
     """
-    result_request = insert_dataset_info(datasetConfigId, ownerId, campaingId, status, nbRows, datasetName)
+    result_request = insert_dataset_info(dataset_row_id, datasetConfigId, ownerId, campaingId, status, nbRows, datasetName)
 
     if result_request == True:
         return True
@@ -119,11 +119,14 @@ def inserting_dataset_info(datasetConfigId: int, ownerId: str, campaingId: str =
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def update_finished_dataset(datasetId: str, s3Url: str, FinishedAt: str, generationError: str, status: str) -> bool:
+def update_finished_dataset(datasetId: str, generationError: str, status: str) -> bool:
     """
     Update finished dataset
     """
-    reuslt_request = update_finished_dataset_info(datasetId, s3Url, FinishedAt, generationError, status)
+    print("datasetId -->", datasetId)
+    print("generationError -->", generationError)
+    print("status -->", status)
+    reuslt_request = update_finished_dataset_info(datasetId, generationError, status)
 
     if reuslt_request == True:
         return True
@@ -134,11 +137,11 @@ def update_finished_dataset(datasetId: str, s3Url: str, FinishedAt: str, generat
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def update_status_dataset(datasetId: str, status: str, generationError: str= None) -> bool:
+def update_status_dataset(datasetId: str, status: str) -> bool:
     """
     Update status dataset
     """
-    reuslt_request = update_status_dataset_info(datasetId, status, generationError)
+    reuslt_request = update_dataset_status_info(datasetId, status)
 
     if reuslt_request == True:
         return True
