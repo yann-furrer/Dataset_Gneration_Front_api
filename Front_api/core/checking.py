@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
 from database.queries.security import check_session_token, check_user_api_token, check_user_suscription_limit, select_dev_token_info
-
+from database.queries.dev_api import select_dev_token_info
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 load_dotenv()
