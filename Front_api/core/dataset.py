@@ -70,7 +70,7 @@ def get_dataset_config_info(datasetId: str, userId: str) -> dict:
     Get dataset config
     """
     result_request = select_dataset_config(datasetId, userId)
-    print("result_request -->", result_request)
+    print("result_request s3 -->", result_request)
     if result_request != None:
         return result_request
     else:
@@ -85,8 +85,8 @@ def get_dataset_config_info(datasetId: str, userId: str) -> dict:
 def select_dataset_for_historical(userId: str, offset: int) -> dict:
     result_request = select_dataset_historical_offset(userId, offset)
     data_dict = [
-    {"id": item[0],  "datasetId":  item[1], "nbRows": item[2], "datasetConfigId": item[3], "campaignId": item[4],
-    "status": item[5], "FinishedAt": item[6], "TimeToGenerate": item[7]}
+    {"id": item[0], "nbRows": item[1], "datasetConfigId": item[2],"clientId": item[3], "campaignId": item[4],
+    "status": item[5], "FinishedAt": item[6], "TimeToGenerate": item[7], "datasetName": item[8]}
                 for item in result_request
                 ]
     return data_dict
@@ -186,7 +186,7 @@ def get_dataset_config_historical_offset(userId: str, offset: int) -> dict:
     result_request = select_dataset_historical_config_offset(userId, offset)
     if result_request != None:
         data_dict = [
-        {"datasetId": item[0], "yamlName": item[1], "yamlContent": item[2], "draftResult": item[3], "ruleId": item[4], "nbrows": item[5], "compaignId": item[6]}
+        {"datasetId": item[0], "yamlName": item[1], "yamlContent": item[2], "draftResult": item[3], "ruleId": item[4], "nbrows": item[5], "compaignId": item[6], "createdAt": item[7]}
             for item in result_request
             ]
         return data_dict

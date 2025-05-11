@@ -4,6 +4,8 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import  HTTPBearer
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+from utils.s3_handle import S3Manager
+
 from core.queue_config import send_message_to_celery_queue, TaskSchema
 from core.checking import check_user_limit_credit, get_session_token
 from core.user import insert_subscription
@@ -15,7 +17,7 @@ from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset,
 
 router = APIRouter()
 security = HTTPBearer()  
-
+s3_manager = S3Manager()
 # cette route ne génère pas de dataset mais elle permet de sauvegarder la configuration du dataset
 # pour l'utilisateur
 # pas besoinde vérifier le quota de l'utilisateur car il n'y a pas de génération de dataset
@@ -40,7 +42,9 @@ async def get_dataset(request: Request , userId : str = Depends(get_session_toke
     result_request = get_dataset_config_info(datasetId, userId)
 
     if result_request != None:
-        return {"id": result_request[0],"datasetId": result_request[1] ,"userId": result_request[2], "yamlName": result_request[3], "yamlContent": result_request[4], "draftResult": result_request[5], "nbRows": result_request[6], "rulesid": result_request[7], "campaignid": result_request[8]}
+        result = {"id": result_request[0],"datasetId": result_request[1] ,"userId": result_request[2], "yamlName": result_request[3], "yamlContent": result_request[4], "draftResult": result_request[5], "nbRows": result_request[6], "rulesid": result_request[7], "campaignid": result_request[8]}
+        
+        return result
     else:
         raise HTTPException(
             status_code=400,
@@ -48,56 +52,25 @@ async def get_dataset(request: Request , userId : str = Depends(get_session_toke
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-# Il faudra faire une route qui permet de faire un appel en lot de 10 requetes
-# pour eviter la surcharge de la base de donnée
-@router.get("/dataset/get_s3_url")
-async def get_s3_url(userId : str = Depends(get_session_token)):
-    """
-    Get S3 url
-    """
-    # body = await request.json()
-    # datasetId = body.get("datasetId" , "")
-    # ownerId = body.get("ownerId" , "")
-    if userId == "":
-        raise HTTPException(
-            status_code=400,
-            detail="User Not Found or error in the request please check session token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    result_request = select_all_s3_url_from_dataset(userId)
-    
-    if result_request != None:
-        return result_request
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Error while getting S3 url from userid not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )       
-    
-@router.post("/dataset/get_dataset_historical")
-async def get_dataset_historical(request : Request, userId : str = Depends(get_session_token)):
+
+@router.get("/dataset/get_dataset_historical")
+async def get_dataset_historical(userId : str = Depends(get_session_token), page_number: int = -2):
     """
     Get dataset 
     """
-    body = await request.json()
-    page_number = body.get("page_number" , 0)
-    if type(page_number) != int:
-        raise HTTPException(
-            status_code=400,
-            detail="page_number must be an integer or missing in body",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     if page_number < 0:
         raise HTTPException(
             status_code=400,
-            detail="page_number must be a positive integer",
+            detail="page_number must be an integer or superior to 0 or missing in body",
             headers={"WWW-Authenticate": "Bearer"},
-            )
-        
+        )
+        # get_dataset_info
     result_request = select_dataset_for_historical(userId, page_number)
-
-    if result_request != None:
+    if result_request != False:
+        # for item in result_request:
+        #     print("item -->", item)
+        #     item.update( {"S3_URL" : s3_manager.generate_presigned_url(item["clientId"], item["datasetName"])})
+        #     del item["clientId"]
         return result_request
     else:
         raise HTTPException(
@@ -107,13 +80,13 @@ async def get_dataset_historical(request : Request, userId : str = Depends(get_s
         )
     
 
-@router.post("/dataset/get_dataset_config_historical")
-async def get_dataset_config_historical(request : Request, userId : str = Depends(get_session_token)):
+@router.get("/dataset/get_dataset_config_historical")
+# Le -2 permet de créer une erreur si l'utilisateur n'a pas fournit de page number
+async def get_dataset_config_historical( userId : str = Depends(get_session_token), page_number: int = -2):
     """
     Get dataset config
     """
-    body = await request.json()
-    page_number = body.get("page_number" , 0)
+    print("page_number -->", page_number)
     if type(page_number) != int:
         raise HTTPException(
             status_code=400,
@@ -202,7 +175,7 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
     dataset_config_id = body.get("dataset_config_id" , None)
     campaignid = body.get("campaignid" , None) # pour l'instant on ne prend pas en compte le campaignid
     nbRows = body.get("nbRows" , 1)
-    function = body.get("function" , "mock") # description of the function to be executed on the celery queue
+    function = body.get("function" , "preprocessing_generation") # description of the function to be executed on the celery queue
     body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
 
   

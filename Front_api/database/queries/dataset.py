@@ -207,10 +207,10 @@ def select_all_s3_url_by_campaign_from_dataset(compaignId: str, userId: str) -> 
     
 
 SELECT_DATASET_HISTORICAL_OFFSET = """
-SELECT "id", "datasetId", "nbRows", "datasetConfigId", "campaignId", "status", "FinishedAt", "TimeToGenerate" 
+SELECT "id", "nbRows", "datasetConfigId","ownerId", "campaignId", "status", "FinishedAt", "TimeToGenerate" , "datasetName"
 FROM public."Dataset"
-WHERE "userId" = :userId 
-ORDER BY FinishedAt DESC
+WHERE "ownerId" = :ownerId
+ORDER BY "FinishedAt" DESC
 OFFSET :offset_min ROWS
 FETCH NEXT :offset_max ROWS ONLY;
 """
@@ -220,10 +220,10 @@ def select_dataset_historical_offset(userId: str, offset: int) -> dict:
     #"offset_max" is the number of row to take
 
     nb_rows_to_return = 10
-    offset_max = offset * nb_rows_to_return 
-    offset_min = offset_max - nb_rows_to_return
+    offset_min = offset * nb_rows_to_return
+    offset_max = offset_min + nb_rows_to_return
     try:
-        request = session.execute(text(SELECT_DATASET_HISTORICAL_OFFSET), {"userId": userId, "offset_min": offset_min, "offset_max": offset})
+        request = session.execute(text(SELECT_DATASET_HISTORICAL_OFFSET), {"ownerId": userId, "offset_min": offset_min, "offset_max": offset_max})
         result = request.fetchall()
         return result
     except Exception as e:        
@@ -235,10 +235,10 @@ def select_dataset_historical_offset(userId: str, offset: int) -> dict:
 
 
 SELECT_DATASET_CONFIG_HISTORICAL_OFFSET = """
-SELECT "datasetId", "yamlName", "yamlContent", "draftResult", "ruleId", "nbrows", "compaignId"
+SELECT "datasetId", "yamlName", "yamlContent", "draftResult", "rulesId", "nbRows", "campaignId", "createdAt"
 FROM public."DatasetConfig"
 WHERE "userId" = :userId 
-ORDER BY createdAt DESC
+ORDER BY "createdAt" DESC
 OFFSET :offset_min ROWS
 FETCH NEXT :offset_max ROWS ONLY;
 """
@@ -249,8 +249,8 @@ def select_dataset_historical_config_offset(userId: str, offset: int) -> dict:
     #"offset_max" is the number of row to take
 
     nb_rows_to_return = 10
-    offset_max = offset * nb_rows_to_return 
-    offset_min = offset_max - nb_rows_to_return
+    offset_min = offset * nb_rows_to_return
+    offset_max = offset_min + nb_rows_to_return
     try:
         request = session.execute(text(SELECT_DATASET_CONFIG_HISTORICAL_OFFSET), {"userId": userId, "offset_min": offset_min, "offset_max": offset_max})
         result = request.fetchall()
