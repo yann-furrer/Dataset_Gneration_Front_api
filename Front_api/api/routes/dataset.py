@@ -201,7 +201,7 @@ async def update_finished_dataset_info(request: Request ):
 
     """
     body = await request.json()
-    datasetId = body.get("datasetId" , None)
+    datasetId = body.get("datpoasetId" , None)
     if datasetId == None:
         raise HTTPException(
             status_code=400,
