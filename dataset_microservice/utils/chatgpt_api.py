@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-with open("utils/prompt.txt", "r", encoding="utf-8") as fichier:
+with open("./generator/prompt.txt", "r", encoding="utf-8") as fichier:
     prompt_txt = fichier.read()
 
 # Séparer les prompts en utilisant le séparateur "=seprateur="
