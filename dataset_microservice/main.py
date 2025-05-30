@@ -48,7 +48,7 @@ async def dataset_sample(request: Request):
         return JSONResponse({"dataset_sample": dataset_sample})
 
 
-@app.post("/get_dataset")
+@app.post("/generate_dataset_config", dependencies=[Depends(verify_api_key)])
 async def get_dataset(request: Request):
         body = await request.json()
 

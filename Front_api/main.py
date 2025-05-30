@@ -1,11 +1,10 @@
 from fastapi import FastAPI
-from api.routes import sse, dev_token, user, dataset
+from api.routes import sse, dev_token, user, dataset, dataset_sample
 
 app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
 
 # Configuration CORS
 origins = [
@@ -29,7 +28,7 @@ app.include_router(sse.router)
 app.include_router(user.router)
 app.include_router(dev_token.router)
 app.include_router(dataset.router)
-
+app.include_router(dataset_sample.router)
 
 @app.get("/welcome")
 async def welcome():

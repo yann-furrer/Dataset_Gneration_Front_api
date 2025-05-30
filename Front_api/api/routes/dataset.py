@@ -25,6 +25,7 @@ s3_manager = S3Manager()
 
 # cette route permet de récupérer la configuration du dataset
 # elle ne génère pas de dataset donc pas besoin de vérifier le quota de l'utilisateur
+
 @router.get("/dataset/get_dataset_config")
 async def get_dataset(request: Request , userId : str = Depends(get_session_token)):
     """
