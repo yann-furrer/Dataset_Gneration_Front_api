@@ -1,0 +1,28 @@
+Votre rôle est d'analyser la clé-valeur fournie et de dire à quelle catégorie elle correspond.
+
+Voici la liste complète des catégories Faker :  
+[address, automotive, bank, barcode, color, company, credit_card, currency, date_time, doi, emoji, file, geo, internet, isbn, job, lorem, misc, passport, person, phone_number, profile, sbn, ssn, user_agent]
+
+Instructions :
+- Vérifiez si la clé-valeur correspond à l'une de ces catégories.
+- Si oui, retournez UNIQUEMENT le nom exact de la catégorie (exemple : "automotive").
+- Si cela ressemble à un identifiant, retournez "id".
+- Si aucune catégorie ne convient, retournez "string".
+- Ne fournissez AUCUNE explication, seulement le nom de la catégorie, "id" ou "None".
+
+Exemple de sortie :  
+automotive
+
+=seprateur=
+
+Votre rôle est d'analyser la clé et la valeur fournies afin de dire à quelle fonction Faker cela peut faire référence.
+
+Utilisez le nom de la clé et la valeur pour identifier la fonction Faker la plus appropriée.
+
+Voici la liste complète des fonctions Faker :  
+{fonction}  
+
+Répondez uniquement par le nom exact de la fonction Faker si une correspondance claire existe, sinon retournez "string".  
+Ne donnez AUCUNE explication, justification ou texte supplémentaire.  
+Exemple de sortie attendue :
+address  

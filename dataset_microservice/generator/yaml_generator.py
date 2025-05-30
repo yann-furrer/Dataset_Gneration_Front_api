@@ -11,7 +11,6 @@ from generator.utils_generator import extract_keys, get_type_name, YamlUtils, ex
 faker_functions = json.load(open("generator/faker_data/faker_category.json"))
 
 
-
 class GPTClassifier:
     def __init__(self, prompt_file: str) -> None:
         """Initialise le classificateur avec l'API Key et charge les prompts."""
@@ -91,7 +90,7 @@ class GPTClassifier:
             # print("concat : ", faker_functions["faker.providers."+gpt_category_results[counter]])
             # print("fkaerteest : ", faker_functions["faker.providers.person"])
             # print("faker : ", faker_functions["faker.providers."+gpt_category_results[counter]])
-
+            print(gpt_category_results)
             system_message_prompt = system_message_prompt.replace("{fonction}", '" '.join(faker_functions["faker.providers."+gpt_category_results[counter]]))
             print(str(f"{{'{key}': '{value}'}}"))
             task = asyncio.create_task(
@@ -138,7 +137,7 @@ class GPTClassifier:
 
 
 
-class YamlGenerator(YamlcUtils):
+class YamlGenerator(YamlUtils):
     def __init__(self, dataset_name: str, sample_data: dict,number_of_records: int, entrytpath: str = "root") -> None:
         """Initialise le générateur de YAML avec les paramètres."""
        
@@ -221,7 +220,7 @@ class YamlGenerator(YamlcUtils):
           - Construction de la structure finale
           Construit la structure du YAML en fonction de la valeur de entrytpath.
         """
-        classifier = GPTClassifier("Dataset_Back_compute/utils/prompt.txt")
+        classifier = GPTClassifier("/utils/prompt.txt")
         type_list = await classifier.classify_values(section_data, pass_first_index=pass_first_index)
         self.index = 0  # Réinitialisation de l'index avant de flatten l'objet
         flattened = self.flatten_object(section_data, type_list=type_list, is_root=is_root)
@@ -377,9 +376,9 @@ optician =[{
 
 }]
 
-if __name__ == "__main__":
-    test_generator = YamlGenerator(dataset_name="yann",sample_data=yaml_data, number_of_records=1000, entrytpath="root")
-    a = asyncio.run(test_generator.execute(False))
-    end_time = time.time()
+# if __name__ == "__main__":
+#     test_generator = YamlGenerator(dataset_name="yann",sample_data=yaml_data, number_of_records=1000, entrytpath="root")
+#     a = asyncio.run(test_generator.execute(False))
+#     end_time = time.time()
 
-    # print(f"Temps d'exécution : {end_time - start_time:.6f} secondes")
+#     # print(f"Temps d'exécution : {end_time - start_time:.6f} secondes")

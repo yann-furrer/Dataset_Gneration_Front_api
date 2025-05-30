@@ -1,5 +1,4 @@
-business_rules==1.1.1
-PyYAML==6.0.2
+
 uvicorn==0.32.1
 tqdm==4.67.1
 fastapi==0.115.6

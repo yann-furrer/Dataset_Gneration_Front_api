@@ -56,6 +56,7 @@ def extract_keys_values(data, values=None, keys=None):
 
 
 def get_type_name(value):
+    print("value", value, type(value))
     """
     Trouve le type d'un objet en fonction de sa valeur.
     """
@@ -142,8 +143,9 @@ class YamlUtils:
         """Ecrit les données YAML dans un fichier."""
         print("write_yaml : ", file_name)
         path = "./config/"+file_name+".yaml"
-        with open(path, 'w+') as f:
-            yaml.dump(file_data, f, allow_unicode=True, sort_keys=False, indent=1)
+        print(yaml.dump(file_data, allow_unicode=True, sort_keys=False, indent=1))
+        # with open(path, 'w+') as f:
+        #     yaml.dump(file_data, f, allow_unicode=True, sort_keys=False, indent=1)
 
 
     def configure_dataset_yaml(self, type_of_value: str, example_value : str )-> dict:
