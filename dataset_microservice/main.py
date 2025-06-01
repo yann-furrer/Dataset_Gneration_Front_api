@@ -1,4 +1,5 @@
-import uvicorn, os
+import uvicorn, os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,7 @@ from fastapi import FastAPI, Header, HTTPException, status, Depends, Request
 
 from generator.yaml_generator import YamlGenerator
 from dataset_sample_generation import datasetSampleGeneration
+from utils.faker_handler import FakerHandler 
 load_dotenv()
 
 
@@ -20,6 +22,8 @@ def verify_api_key(x_api_key: str = Header(...)):
             detail="API Key invalide"
         )
 
+# Instanciation de la classe qui gère les types fakers
+faker_handler = FakerHandler()
 
 app = FastAPI()
 
@@ -60,6 +64,58 @@ async def get_dataset(request: Request):
         dataset_config_class = YamlGenerator(dataset_name=dataset_name,sample_data=yaml_data, number_of_records=number_of_records, entrytpath=entrytpath)
         dataset_config = await dataset_config_class.execute(False)
         return JSONResponse({"dataset_config": dataset_config})
+
+
+
+##################### Routes pour la gestion des types de données Faker
+
+@app.get("/faker_list/{user_id}", dependencies=[Depends(verify_api_key)])
+async def get_faker_list(user_id: str):
+    """
+    Retourne la liste des types de données Faker disponibles.
+    """
+    faker_types = faker_handler.get_faker_type_on_mongo_db_by_client_id(client_id=user_id)
+    print("faker_types:", faker_types)
+    return JSONResponse({"faker_types": faker_types})
+
+
+@app.post("/insert_faker_type", dependencies=[Depends(verify_api_key)])
+async def insert_faker_type(request: Request):
+    body = await request.json()
+    faker_type_name = body.get("faker_type_name", None)
+    faker_type_id = body.get("faker_type_id", None)
+    faker_list = body.get("faker_list", None)
+    client_id = body.get("client_id", None)
+    category = body.get("category", None)
+    description = body.get("description", None)
+    #  Pour l'instant on renvois l'intégralité de la liste de valeurs contenant les différents types de données Faker
+    #  Dans l'avenir on comparera les valeurs avec les types de données disponibles sur MongoDB
+    repsonse = faker_handler.insert_faker_type_on_mongo_db(faker_type_name=faker_type_name, faker_type_id=faker_type_id, faker_list=faker_list, client_id=client_id, category=category, description=description)
+    if repsonse:
+        return JSONResponse({"message": "Faker type inserted successfully"})
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while inserting faker type",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+@app.delete("/delete_faker_type", dependencies=[Depends(verify_api_key)])
+async def delete_faker_type(request: Request):
+    body = await request.json()
+    client_id = body.get("client_id", None)
+    faker_type_id = body.get("faker_type_id", None)
+    if not client_id and not faker_type_id:
+        raise HTTPException(
+            status_code=400,
+            detail="client_id or faker_type_id is required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    repsonse = faker_handler.delete_faker_type_on_mongo_db(faker_type_id ,client_id)
+    if repsonse: # Retournne True si la suppression a réussi
+        return JSONResponse({"message": "Faker type deleted successfully"})
+
+
 
 
 if __name__ == "__main__":

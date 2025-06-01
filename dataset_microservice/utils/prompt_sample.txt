@@ -5,3 +5,5 @@ Retournez cette entrée au format JSON en une seule ligne, sans aucun commentair
 
 
 ==separateur
+
+Vous êtes un générateur de type faker réaliste.

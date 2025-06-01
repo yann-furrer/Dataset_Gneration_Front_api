@@ -12,14 +12,15 @@ with open("./generator/prompt.txt", "r", encoding="utf-8") as fichier:
 prompts_list = prompt_txt.split("=seprateur=")
 
 class ChatGPTAsyncClient:
-    def __init__(self, api_key, model="gpt-4.1-mini"):
+    def __init__(self, model="gpt-4.1-mini"):
+        self.api_key = os.getenv("OPENAI_API_KEY")
         """
         Initialise le client ChatGPT asynchrone.
         
         :param api_key: Clé API pour authentification auprès d'OpenAI.
         :param model: Modèle à utiliser pour les requêtes (par défaut : gpt-4.1-mini).
         """
-        self.client = openai.AsyncOpenAI(api_key=api_key)
+        self.client = openai.AsyncOpenAI(api_key=self.api_key)
         self.model = model
 
     def select_prompt(self, nb_prompt: int = 0)-> str:

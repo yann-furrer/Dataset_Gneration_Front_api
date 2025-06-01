@@ -65,7 +65,12 @@ def get_type_name(value):
         return "object"
     elif isinstance(value, list):
         return "array"
-    elif isinstance(value, int):
+    elif value.isnumeric() :
+        print("value is numeric")
+        if isinstance(value, int):
+            return "integer"
+        elif isinstance(value, float):
+            return "float"
         return "integer"
     elif isinstance(value, float):
         return "integer"

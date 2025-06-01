@@ -14,7 +14,7 @@ faker_functions = json.load(open("generator/faker_data/faker_category.json"))
 class GPTClassifier:
     def __init__(self, prompt_file: str) -> None:
         """Initialise le classificateur avec l'API Key et charge les prompts."""
-        self.gpt_client = ChatGPTAsyncClient(api_key= os.getenv("OPENAI_API_KEY"))
+        self.gpt_client = ChatGPTAsyncClient()
    
     async def classify_values(self, yaml_data: dict, pass_first_index: bool = False) -> List[str]:
         """
@@ -289,13 +289,107 @@ class YamlGenerator(YamlUtils):
 
 
 
+class FrontendYamlGenerator(YamlUtils):
+    def __init__(self, dataset_name: str, sample_data: dict, number_of_records: int, entrytpath: str = "root") -> None:
+        """Initialise le générateur de YAML avec les paramètres."""
+        super().__init__()
+        self.dataset_name = dataset_name
+        self.sample_data = sample_data
+        self.number_of_records = number_of_records
+        self.entrytpath = entrytpath  # point d'entrée du json
 
 
- 
 
+
+    def generate_structure_type(self, type: str, name: str, value: Any, params: dict) -> Dict:
+        if type != "object" and type != "array" and type != "faker":
+            return {
+                "fieldname": "join_2",
+                "type": "id",
+                "children": []
+            }
+        elif type == "object" or type == "array":
+            return {
+                "fieldname": name,
+                "type": type,
+                "children": []
+            }
+        elif type == "faker":
+            return {
+                "fieldname": name,
+                "type": type,
+                "fakerType": value,
+                "rules": params.get("rules", "")
+            }
+
+    def load_structure_type(self, sample_data: dict) -> None:
+        temp_object = []
+        for item in sample_data:
+            type_name = get_type_name(item)
+            print("item : ", item)
+            print("type_name : ", type_name)
+            print("type -_> ,",type(item))
+            if isinstance(item, dict) or isinstance(item, list):
+                print("item is dict or list")
+                self.load_structure_type(item)
+
+            
+        
+
+
+    def execute(self) -> Dict[str, Any]:
+       
+        print(self.sample_data)
+        self.load_structure_type(self.sample_data)
 
 
     
+
+exmeple = [
+    {
+        "fieldname": "rule_1",
+        "type": "object",
+        "children": [
+            {
+                "fieldname": "join_2",
+                "type": "id",
+                "children": []
+            },
+            {
+                "fieldname": "join_3bis",
+                "type": "object",
+                "children": [
+                    {
+                        "fieldname": "join_3A",
+                        "type": "string",
+                        "children": []
+                    },
+                    {
+                        "fieldname": "join_terger",
+                        "type": "string",
+                        "children": []
+                    },
+                    {
+                        "fieldname": "join_3&&&",
+                        "type": "string",
+                        "children": []
+                    },
+                    {
+                        "fieldname": "frfuhr",
+                        "type": "object",
+                        "children": [
+                            {
+                                "fieldname": "fe",
+                                "type": "faker",
+                                "fakerType": "email",
+                                "rules": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }]
 
 
 
@@ -375,6 +469,10 @@ optician =[{
     "marque favorite" : "Rayban" 
 
 }]
+
+
+# testfrontend = FrontendYamlGenerator(dataset_name="yann",sample_data=yaml_data, number_of_records=1000, entrytpath="root")
+# a = testfrontend.execute()
 
 # if __name__ == "__main__":
 #     test_generator = YamlGenerator(dataset_name="yann",sample_data=yaml_data, number_of_records=1000, entrytpath="root")
