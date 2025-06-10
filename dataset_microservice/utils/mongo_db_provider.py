@@ -1,9 +1,10 @@
+import os, sys
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, PyMongoError
 from dotenv import load_dotenv
-import os
 from typing import Dict, List, Any, Optional, Union
 from bson import ObjectId
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 load_dotenv()
 
@@ -203,7 +204,7 @@ class MongoDBManager:
         try:
             collection = self.get_collection(collection_name)
             filter_dict = filter_dict or {}
-            cursor = collection.find(filter_dict, projection={"_id": 0})  # Exclut l'ID par défaut
+            cursor = collection.find(filter_dict, projection={"_id": 0, "faker_type_name": 1, "category": 1})  # Exclut l'ID par défaut
             if limit > 0:
                 cursor = cursor.limit(limit)
             return list(cursor)

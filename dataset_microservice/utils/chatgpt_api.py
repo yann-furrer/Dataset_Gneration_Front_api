@@ -56,7 +56,7 @@ class ChatGPTAsyncClient:
                 temperature=temperature,
                 response_format={"type": response_format},
         )
-        print("repsonse : "+ str(time.time), response.choices[0].message.content)
+        # print("repsonse : "+ str(time.time), response.choices[0].message.content)
         return response.choices[0].message.content
 
 

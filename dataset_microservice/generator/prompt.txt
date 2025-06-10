@@ -13,7 +13,7 @@ Instructions :
 Exemple de sortie :  
 automotive
 
-=seprateur=
+==seprateur==
 
 Votre rôle est d'analyser la clé et la valeur fournies afin de dire à quelle fonction Faker cela peut faire référence.
 

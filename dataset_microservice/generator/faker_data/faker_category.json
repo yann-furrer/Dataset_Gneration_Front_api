@@ -1,6 +1,6 @@
 {
   "faker.providers.id": ["ki"],
-  "faker.providers.string": ["string"],
+
   "faker.providers.address": [
     "administrative_unit", "building_number", "city", "city_prefix", "city_suffix", 
     "country", "country_code", "current_country", "current_country_code", "military_apo", 
@@ -88,13 +88,6 @@
   "faker.providers.lorem": [
     "paragraph", "paragraphs", "sentence", "sentences", "text", "texts", "word", "words"
   ],
-  
-  "faker.providers.misc": [
-    "binary", "boolean", "bothify", "csv", "dsv", "fixed_width", "hexify", "image", 
-    "json", "json_bytes", "lexify", "md5", "null_boolean", "numerify", "password", "psv", 
-    "sha1", "sha256", "tar", "tsv", "uuid4", "xml"
-  ],
-  
   "faker.providers.passport": [
     "passport_dates", "passport_dob", "passport_full", "passport_gender", 
     "passport_number", "passport_owner"
