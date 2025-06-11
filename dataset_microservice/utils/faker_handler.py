@@ -20,14 +20,12 @@ with open("./generator/faker_data/faker_category.json", "r", encoding="utf-8") a
     faker_cateogry_keys = list(faker_category.keys())
 
 class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
-    def __init__(self, faker_type_name: str = None, faker_type_id: str = None, client_id: str = "12345") -> None:
+    def __init__(self, client_id: str = "12345"):
         MongoDBManager.__init__(self)
         ChatGPTAsyncClient.__init__(self)
         self.client_id = client_id
-        self.faker_type_name = faker_type_name
-        self.faker_type_id = faker_type_id
-        self.faker_category_list: dict = defaultdict(list)  # Crée automatiquement des listes pour les nouvelles clés
         self.faker_category_keys: dict = defaultdict(list)  # Crée automatiquement des listes pour les nouvelles clés
+        self.faker_category_list: dict = defaultdict(list)  # Crée automatiquement des listes pour les nouvelles clés
         self.faker_category_list , self.faker_category_keys = self.initfaker_category(self.client_id)
 
 
@@ -140,8 +138,8 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         """
       
         faker_exist_response = await self.check_faker_type_exists(faker_type_name=str(elem_to_analyze), client_id=client_id)
-      
-        if faker_exist_response["newCategory"] == False:
+        print("-->",faker_exist_response)
+        if faker_exist_response["newCategory"] == False and faker_exist_response["function"] != "empty":
             print("Le type faker existe dans la base de données MongoDB.")
             return faker_exist_response["function"]
         
@@ -186,16 +184,21 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
                         max_tokens=120, temperature=0, response_format="text"
                         )
         check_faker_info = json.loads(check_faker_info)
-
+        print("check_faker_info", check_faker_info)
         if check_faker_info["newCategory"] == False: # cas ou la catégorie existe déjà  
             function_name = await self.make_api_call(str(faker_type_name), 
                         system_message=prompts_list[3].replace("{fonction}", str(self.faker_category_list[check_faker_info["category"]])), 
                         max_tokens=120, temperature=1, response_format="text"
                         )
-            if function_name != "empty":
                 
-                return check_faker_info.update({"function": function_name})
-        
+            print("function_name", function_name)
+            if function_name != "empty":
+                check_faker_info.update({"function": function_name})
+                return check_faker_info
+            else : 
+                check_faker_info.update({"function": "empty"})
+                return check_faker_info
+        print(check_faker_info)
         return check_faker_info
         
 

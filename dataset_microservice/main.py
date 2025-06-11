@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import FastAPI, Header, HTTPException, status, Depends, Request
 
-from generator.yaml_generator import YamlGenerator
+from generator.webconfig_generator import WebConfigGenerator
 from dataset_sample_generation import datasetSampleGeneration
 from utils.faker_handler import FakerHandler 
 load_dotenv()
@@ -52,17 +52,21 @@ async def dataset_sample(request: Request):
         return JSONResponse({"dataset_sample": dataset_sample})
 
 
-@app.post("/generate_dataset_config", dependencies=[Depends(verify_api_key)])
+@app.post("/generate_webconfig", dependencies=[Depends(verify_api_key)])
 async def get_dataset(request: Request):
         body = await request.json()
-
-        dataset_name = body.get("dataset_name", "new dataset")
-        yaml_data = body.get("yaml_data", None)
-        number_of_records = body.get("number_of_records", 1000)
-        entrytpath = body.get("entrytpath", "root")
+        client_id = body.get("client_id", None)
+        json_sample = body.get("json_sample", None)
+        if not client_id:
+            raise HTTPException(
+                status_code=400,
+                detail="client_id is required",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+      
      
-        dataset_config_class = YamlGenerator(dataset_name=dataset_name,sample_data=yaml_data, number_of_records=number_of_records, entrytpath=entrytpath)
-        dataset_config = await dataset_config_class.execute(False)
+        webconfig_class = WebConfigGenerator(client_id=client_id)
+        dataset_config = await webconfig_class.build_schema(input_data=json_sample)
         return JSONResponse({"dataset_config": dataset_config})
 
 

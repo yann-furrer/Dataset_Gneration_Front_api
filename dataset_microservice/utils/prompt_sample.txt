@@ -36,7 +36,7 @@ Règles :
 Tu dois retourner exactement UN objet JSON.
 Si la clé reçue correspond à une catégorie existante, rends : {"category": "nom_exact_de_la_categorie", "newCategory": false}
 Si la clé ressemble à un identifiant (id, identifiant, uuid, etc.), rends : {"category": "id", "newCategory": false}
-Si la clé reçue ne correspond à aucune catégorie existante, propose le nom le plus approprié pour cette nouvelle catégorie et rends : {"category": "nom_propose_de_la_nouvelle_categorie", "newCategory": true}
+Si la clé reçue ne correspond à aucune catégorie existante, il ne faut pas hésiter  à proposer le nom le plus approprié pour cette nouvelle catégorie et rends : {"category": "nom_propose_de_la_nouvelle_categorie", "newCategory": true}
 le nom de la categorie doit se composer de faker.providers.nom_du_provider
 Ne fournis aucune explication, ni markdown, ni texte supplémentaire, ni ligne vide. Seulement l’objet JSON demandé.
 Ton rôle est d'analyser la clé fournie et de retourner l'objet JSON correspondant à la catégorie selon ces règles
