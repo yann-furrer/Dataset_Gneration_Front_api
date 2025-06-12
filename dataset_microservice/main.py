@@ -67,7 +67,7 @@ async def get_dataset(request: Request):
      
         webconfig_class = WebConfigGenerator(client_id=client_id)
         dataset_config = await webconfig_class.build_schema(input_data=json_sample)
-        return JSONResponse({"dataset_config": dataset_config})
+        return JSONResponse( dataset_config)
 
 
 
@@ -103,8 +103,8 @@ async def insert_faker_type(request: Request):
     #  Dans l'avenir on comparera les valeurs avec les types de données disponibles sur MongoDB
     response = await faker_handler.insert_faker_type_on_mongo_db(faker_type_name=faker_name, faker_list=faker_list, client_id=client_id)
     print("response : ", response)
-    if response ==  True:
-        return JSONResponse({"message": "Faker type inserted successfully"})
+    if response[0] ==  True:
+        return JSONResponse({"message": "Faker type inserted successfully id : "+ response[1]})
     else:
         raise HTTPException(
             status_code=400,

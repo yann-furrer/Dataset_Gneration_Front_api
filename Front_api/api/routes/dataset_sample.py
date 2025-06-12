@@ -98,7 +98,7 @@ async def insert_faker_type(request: Request, userId: str = Depends(get_session_
 
     async with httpx.AsyncClient() as client:
         print("micro service url:", MICRO_SERVICE_URL)
-        response = await client.post(f"{MICRO_SERVICE_URL}/insert_faker_type", 
+        response = await client.put(f"{MICRO_SERVICE_URL}/insert_faker_type", 
             headers={"X-API-KEY": os.getenv("API_KEY")},
             json={"client_id": userId, "faker_type_name": faker_type_name, "faker_type_id": faker_type_id, "faker_list": faker_list, "category": category, "description": "None"})
         if response.status_code != 200:
@@ -106,10 +106,37 @@ async def insert_faker_type(request: Request, userId: str = Depends(get_session_
         
     return JSONResponse( response.json())
 
-@router.delete("/microservice/delete_faker_type")
-async def delete_faker_type(request: Request, userId: str = Depends(get_session_token)):
+
+
+
+@router.patch("/microservice/update_faker_type")
+async def insert_faker_type(request: Request, userId: str = Depends(get_session_token)):
     body = await request.json()
+   
+
+
     faker_type_id = body.get("faker_type_id", None)
+    faker_list = body.get("new_faker_list", None)
+    print("userId -->", userId)
+    async with httpx.AsyncClient() as client:
+        print("micro service url:", MICRO_SERVICE_URL)
+        response = await client.patch(f"{MICRO_SERVICE_URL}/update_faker_type", 
+            headers={"X-API-KEY": os.getenv("API_KEY")},
+            json={"client_id": userId, "faker_type_id": faker_type_id, "new_faker_list": faker_list})
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        
+    return JSONResponse( response.json())
+
+@router.delete("/microservice/delete_faker_type/{faker_type_id}")
+
+
+
+
+
+@router.delete("/microservice/delete_faker_type/{faker_type_id}")
+async def delete_faker_type(request: Request,faker_type_id: str, userId: str = Depends(get_session_token)):
+    
     
     if not faker_type_id:
         raise HTTPException(
@@ -120,8 +147,8 @@ async def delete_faker_type(request: Request, userId: str = Depends(get_session_
     
     async with httpx.AsyncClient() as client:
         print("micro service url:", MICRO_SERVICE_URL)
-        response = await client.post(f"{MICRO_SERVICE_URL}/delete_faker_type", 
-            headers={"X-API-KEY": os.getenv("API_KEY")},
-            json={"client_id": userId, "faker_type_id": faker_type_id})
+        response = await client.delete(f"{MICRO_SERVICE_URL}/delete_faker_type/{faker_type_id}/{userId}",
+            headers={"X-API-KEY": os.getenv("API_KEY")})
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
+        return JSONResponse( response.json())
