@@ -29,7 +29,15 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         self.faker_category_list , self.faker_category_keys = self.initfaker_category(self.client_id)
 
 
-  
+    
+    def get_aggregated_faker_types_by_client(self, client_id: str) -> List[Dict[str, Any]]:
+        """
+        Récupère pour un client donné la liste des faker_types
+        groupés par category, chacun ne conservant que faker_type_id et faker_type_name.
+        """
+        return self.get_grouped_faker_types_by_client(client_id)
+
+
     #note pour plus tard : ajouter la pagination pour les types fakers
     # https://codebeyondlimits.com/articles/pagination-in-mongodb-the-only-right-way-to-implement-it-and-avoid-common-mistakes
     def get_faker_type_on_mongo_db_by_client_id(self, filter_dict: str, projection_dict: Dict[str, Any] = None) -> Optional[dict]:

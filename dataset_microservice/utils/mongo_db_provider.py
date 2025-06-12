@@ -12,7 +12,7 @@ class MongoDBManager:
     def __init__(self):
         """
         Initialise la connexion à MongoDB
-        
+        x
         Args:
             database_name: Nom de la base de données (par défaut utilise 'Faker')
         """
@@ -169,6 +169,67 @@ class MongoDBManager:
             return 0
     
     # ======================== FONCTIONS DE RECHERCHE ========================
+
+
+    def get_grouped_faker_types_by_client(
+        self,
+        client_id: str,
+    ) -> List[Dict[str, Any]]:
+        """
+        Récupère pour un client donné la liste des faker_types
+        groupés par category, chacun ne conservant que faker_type_id et faker_type_name.
+        """
+        try:
+            coll = self.get_collection()
+            pipeline = [
+                { "$match": { "client_id": client_id }},
+
+                # parser JSON si besoin
+                { "$addFields": {
+                    "category": {
+                      "$function": {
+                        "body": """
+                          function(cat) {
+                            try { 
+                              const o = JSON.parse(cat);
+                              return o.category || cat;
+                            }
+                            catch(e) { return cat; }
+                          }
+                        """,
+                        "args": ["$category"],
+                        "lang": "js"
+                      }
+                    }
+                }},
+
+                # on renomme dans le $push
+                { "$sort": { "category": 1, "faker_type_name": 1 }},
+
+                { "$group": {
+                    "_id": "$category",
+                    "types": {
+                        "$push": {
+                            "id":   "$faker_type_id",
+                            "name": "$faker_type_name"
+                        }
+                    }
+                }},
+
+                { "$project": {
+                    "_id": 0,
+                    "category": "$_id",
+                    "types": 1
+                }}
+            ]
+
+            docs = list(coll.aggregate(pipeline))
+            # transforme la liste en mappage clé=categorie → valeur=types
+            return { d["category"]: d["types"] for d in docs }  
+
+        except PyMongoError as e:
+            print(f"❌ Erreur lors de l’agrégation groupée: {e}")
+            return []
     
     def find_one(self, filter_dict: Dict[str, Any] = None, collection_name: str = None) -> Optional[Dict]:
         """

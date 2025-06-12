@@ -78,9 +78,9 @@ async def get_faker_list(user_id: str):
     """
     Retourne la liste des types de données Faker disponibles sans le contenu.
     """
-    faker_types = faker_handler.get_faker_type_on_mongo_db_by_client_id(filter_dict={"client_id": user_id}, projection_dict={"_id": 0, "faker_type_name": 1, "category": 1, "faker_type_id": 1})
+    faker_types = faker_handler.get_grouped_faker_types_by_client(client_id=user_id)
     print("faker_types:", faker_types)
-    return JSONResponse({"faker_types": faker_types})
+    return JSONResponse( faker_types)
 
 
 @app.get("/faker_content_list/{user_id}/{faker_type_id}", dependencies=[Depends(verify_api_key)])
