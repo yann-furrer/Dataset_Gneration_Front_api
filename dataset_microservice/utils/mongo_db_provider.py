@@ -189,7 +189,7 @@ class MongoDBManager:
             print(f"❌ Erreur lors de la recherche: {e}")
             return None
     
-    def find_many(self, filter_dict: Dict[str, Any] = None, collection_name: str = None, limit: int = 0) -> List[Dict]:
+    def find_many(self, filter_dict: Dict[str, Any] = None, collection_name: str = None, limit: int = 0, projection_dict: Dict[str, Any] = None) -> List[Dict]:
         """
         Trouve plusieurs documents
         
@@ -204,7 +204,7 @@ class MongoDBManager:
         try:
             collection = self.get_collection(collection_name)
             filter_dict = filter_dict or {}
-            cursor = collection.find(filter_dict, projection={"_id": 0, "faker_type_name": 1, "category": 1})  # Exclut l'ID par défaut
+            cursor = collection.find(filter_dict, projection=projection_dict)  # Exclut l'ID par défaut
             if limit > 0:
                 cursor = cursor.limit(limit)
             return list(cursor)

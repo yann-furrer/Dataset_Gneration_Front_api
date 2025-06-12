@@ -4,7 +4,7 @@ import asyncio
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from utils.mongo_db_provider import MongoDBManager
 from utils.chatgpt_api import ChatGPTAsyncClient
-from typing import List, Optional
+from typing import List,Dict,Any, Optional
 from collections import defaultdict
 
 
@@ -32,7 +32,7 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
   
     #note pour plus tard : ajouter la pagination pour les types fakers
     # https://codebeyondlimits.com/articles/pagination-in-mongodb-the-only-right-way-to-implement-it-and-avoid-common-mistakes
-    def get_faker_type_on_mongo_db_by_client_id(self, client_id: str) -> Optional[dict]:
+    def get_faker_type_on_mongo_db_by_client_id(self, filter_dict: str, projection_dict: Dict[str, Any] = None) -> Optional[dict]:
         """
         Récupère un type faker par son ID et son client_id.
         
@@ -42,10 +42,10 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         Returns:
             dict: Le type faker trouvé ou None si aucun type faker n'est trouvé.
         """
-        if not client_id:
-            raise ValueError("Aucun client_id fourni.")
+        if not filter_dict or not isinstance(filter_dict, dict):
+            raise ValueError("Aucun client_id or filter_dict fourni.")
         # Implémentation de la recherche dans la base de données MongoDB
-        result = self.find_many({"client_id": client_id})
+        result = self.find_many(filter_dict=filter_dict, projection_dict=projection_dict)
         return result
 
 
@@ -207,7 +207,7 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         """
         Initialise la liste des catégories Faker à partir du fichier JSON.
         """
-        faker_category_user_list : dict = self.get_faker_type_on_mongo_db_by_client_id(client_id=client_id)
+        faker_category_user_list : dict = self.get_faker_type_on_mongo_db_by_client_id(filter_dict={"client_id": client_id}, projection_dict={"_id": 0, "faker_type_name": 1, "category": 1})
         faker_category = defaultdict(list)  # Crée automatiquement des listes pour les nouvelles clés
 
         for item in faker_category_user_list:
