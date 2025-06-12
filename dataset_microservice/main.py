@@ -100,7 +100,7 @@ async def insert_faker_type(request: Request):
     faker_list = body.get("faker_list", None)
     client_id = body.get("client_id", None)
     category = body.get("category", None)
-    description = body.get("description", None)
+    description = body.get("description", "None")
     #  Pour l'instant on renvois l'intégralité de la liste de valeurs contenant les différents types de données Faker
     #  Dans l'avenir on comparera les valeurs avec les types de données disponibles sur MongoDB
     repsonse = faker_handler.insert_faker_type_on_mongo_db(faker_type_name=faker_type_name, faker_type_id=faker_type_id, faker_list=faker_list, client_id=client_id, category=category, description=description)

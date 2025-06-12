@@ -14,7 +14,7 @@ class datasetSampleGeneration(ChatGPTAsyncClient):
     Permet de générer des données de type sample via l'API ChatGPT.
     """
     def __init__(self)-> None:
-        super().__init__(os.getenv("OPENAI_API_KEY"))
+        super().__init__()
     
 
     async def generate_sample(self, user_prompt: str) -> str:
