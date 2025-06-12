@@ -85,17 +85,26 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         return faker_category
     
 
-    def insert_faker_type_on_mongo_db(self, faker_type_name: str, faker_type_id: str, faker_list: List[str], category: str,  client_id: str, description : str = "No description") -> bool:
+    async def insert_faker_type_on_mongo_db(self, faker_type_name: str, faker_list: List[str], client_id: str) -> bool:
         """
         Insère un type faker dans la base de données MongoDB.
         """
-        if not faker_type_name and not faker_type_id and not faker_list and not client_id and not category:
+        print("faker listr : ", faker_list)
+        find_category = await self.make_api_call(prompt=f" nom de la methode : {faker_type_name} et des exmeple de valeur : {faker_list[:2]} ",
+                        system_message=prompts_list[2].replace("{liste categories}", str(self.faker_category_keys)), 
+                        max_tokens=40, temperature=0, response_format="text"
+                        )
+        find_category = json.loads(find_category)
+        print("find_category : ", find_category)
+        faker_type_id = str(uuid.uuid4().hex[:12] )
+        if not faker_type_name and not faker_type_id and not faker_list and not client_id and not find_category:
             raise ValueError("Nom, ID et valeurs requises pour l'insertion.")
         # Implémentation de l'insertion dans la base de données MongoDB
-        self.add_one({"faker_type_name": faker_type_name, "client_id": client_id, 
-                "faker_type_id": faker_type_id, "description": description,
-                "category": category, "list": json.loads(faker_list)})
-
+        response : bool = self.add_one({"faker_type_name": faker_type_name, "client_id": client_id, 
+                "faker_type_id": faker_type_id, "description": "No description",
+                "category": find_category["category"], "list": faker_list})
+        
+        return response
 
     #  fonction pour supprimer un type faker par son nom ou id sur mongo db 
     def delete_faker_type_on_mongo_db(self, faker_type_id: str = None, client_id: str = None) -> bool:
@@ -121,11 +130,14 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         """
         if not faker_id or not new_faker_list:
             raise ValueError("ID du type faker et valeurs requises pour la mise à jour.")
+        print("faker list " , new_faker_list)
+        print("client_id " , client_id)
+        print("faker_id " , faker_id)
         # Implémentation de la mise à jour dans la base de données MongoDB
-        result = self.update_one({"faker_id": faker_id, "client_id": client_id}, {"$set": {"list": new_faker_list}})
-
-
-    # Fonction pour générer une liste de valeurs Faker automatiquement via l'API ChatGPT
+        result : bool = self.update_one({"faker_type_id": faker_id, "client_id": client_id}, {"$set": {"list": new_faker_list}})
+        return result
+    
+        # Fonction pour générer une liste de valeurs Faker automatiquement via l'API ChatGPT
     async def generate_faker_list_IA_auto(self, elem_to_analyze: dict, client_id: str ) -> str:
         """
         Génère une liste de valeurs Faker automatiquement via l'API ChatGPT.

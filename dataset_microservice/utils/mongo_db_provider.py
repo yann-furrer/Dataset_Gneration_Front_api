@@ -47,7 +47,7 @@ class MongoDBManager:
     
     # ======================== FONCTIONS D'AJOUT ========================
     
-    def add_one(self, document: Dict[str, Any], collection_name: str = None) -> Optional[str]:
+    def add_one(self, document: Dict[str, Any], collection_name: str = None) -> bool:
         """
         Ajoute un seul document
         
@@ -62,13 +62,13 @@ class MongoDBManager:
             collection = self.get_collection(collection_name)
             result = collection.insert_one(document)
             print(f"✅ Document ajouté avec l'ID: {result.inserted_id}")
-            return str(result.inserted_id)
+            return True
         except DuplicateKeyError:
             print(f"❌ Erreur: Document avec cet ID existe déjà")
-            return None
+            return False
         except PyMongoError as e:
             print(f"❌ Erreur lors de l'ajout: {e}")
-            return None
+            return False
     
     def add_many(self, documents: List[Dict[str, Any]], collection_name: str = None) -> List[str]:
         """

@@ -92,3 +92,5 @@ Example output when a new category is created:
   "category": "spaceRelated",
   "newCategory": true
 }
+
+

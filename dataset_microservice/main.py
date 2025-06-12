@@ -1,4 +1,4 @@
-import uvicorn, os, sys
+import uvicorn, os, sys, json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
@@ -92,41 +92,67 @@ async def get_faker_content_list(user_id: str, faker_type_id: str):
     return JSONResponse(faker_types)
 
 
-@app.post("/insert_faker_type", dependencies=[Depends(verify_api_key)])
+@app.put("/insert_faker_type", dependencies=[Depends(verify_api_key)])
 async def insert_faker_type(request: Request):
     body = await request.json()
-    faker_type_name = body.get("faker_type_name", None)
-    faker_type_id = body.get("faker_type_id", None)
     faker_list = body.get("faker_list", None)
+    faker_name = body.get("faker_name", None)
     client_id = body.get("client_id", None)
-    category = body.get("category", None)
-    description = body.get("description", "None")
+  
     #  Pour l'instant on renvois l'intégralité de la liste de valeurs contenant les différents types de données Faker
     #  Dans l'avenir on comparera les valeurs avec les types de données disponibles sur MongoDB
-    repsonse = faker_handler.insert_faker_type_on_mongo_db(faker_type_name=faker_type_name, faker_type_id=faker_type_id, faker_list=faker_list, client_id=client_id, category=category, description=description)
-    if repsonse:
+    response = await faker_handler.insert_faker_type_on_mongo_db(faker_type_name=faker_name, faker_list=faker_list, client_id=client_id)
+    print("response : ", response)
+    if response ==  True:
         return JSONResponse({"message": "Faker type inserted successfully"})
     else:
         raise HTTPException(
             status_code=400,
-            detail="Error while inserting faker type",
+            detail="Error while inserting faker type maybe the content is the same as the previous one",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-@app.delete("/delete_faker_type", dependencies=[Depends(verify_api_key)])
-async def delete_faker_type(request: Request):
+
+
+
+@app.patch("/update_faker_type", dependencies=[Depends(verify_api_key)])
+async def update_faker_type(request: Request):
     body = await request.json()
-    client_id = body.get("client_id", None)
     faker_type_id = body.get("faker_type_id", None)
+    faker_list = body.get("new_faker_list", None)
+    client_id = body.get("client_id", None)
+  
+    #  Pour l'instant on renvois l'intégralité de la liste de valeurs contenant les différents types de données Faker
+    #  Dans l'avenir on comparera les valeurs avec les types de données disponibles sur MongoDB
+    response = faker_handler.update_faker_type_on_mongo_db(faker_id=faker_type_id, new_faker_list=faker_list, client_id=client_id)
+    print("response : ", response)
+    if response ==  True:
+        return JSONResponse({"message": "Faker type inserted successfully"})
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while inserting faker type maybe the content is the same as the previous one",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+@app.delete("/delete_faker_type/{faker_type_id}/{client_id}", dependencies=[Depends(verify_api_key)])
+async def delete_faker_type( client_id: str, faker_type_id: str):
+   
     if not client_id and not faker_type_id:
         raise HTTPException(
             status_code=400,
             detail="client_id or faker_type_id is required",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    repsonse = faker_handler.delete_faker_type_on_mongo_db(faker_type_id ,client_id)
-    if repsonse: # Retournne True si la suppression a réussi
+    response = faker_handler.delete_faker_type_on_mongo_db(faker_type_id ,client_id)
+    if response == True: # Retournne True si la suppression a réussi
         return JSONResponse({"message": "Faker type deleted successfully"})
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while deleting faker content not exist or already deleted",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 

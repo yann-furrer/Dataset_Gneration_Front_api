@@ -21,7 +21,7 @@ router = APIRouter()
 security = HTTPBearer()  
 
 @router.post("/microservice/dataset_sample")
-async def dataset_sample(request: Request):
+async def dataset_sample(request: Request, userId: str = Depends(get_session_token)):
     body = await request.json()
     user_prompt = body.get("user_prompt", None)
     if user_prompt is None:
@@ -56,15 +56,16 @@ async def generate_dataset_config(request: Request, userId: str = Depends(get_se
             json={"client_id": userId, "json_sample": json_sample})
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
+        return JSONResponse(response.json())
 
 
 # ressort toutes les nom de type de données faker disponible pour l'id utilisateur
-@router.get("/microservice/get_faker_name_list/")
+@router.get("/microservice/get_faker_name_list")
 async def get_faker_name_list(request: Request, userId: str = Depends(get_session_token)):
    
     async with httpx.AsyncClient() as client:
         print("micro service url:", MICRO_SERVICE_URL)
-        response = await client.post(f"{MICRO_SERVICE_URL}/faker_name_list/"+userId, 
+        response = await client.get(f"{MICRO_SERVICE_URL}/faker_name_list/"+userId, 
             headers={"X-API-KEY": os.getenv("API_KEY")},)
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
@@ -79,7 +80,7 @@ async def get_faker_name_list(request: Request,faker_type_id: str, userId: str =
    
     async with httpx.AsyncClient() as client:
         print("micro service url:", MICRO_SERVICE_URL)
-        response = await client.post(f"{MICRO_SERVICE_URL}/faker_content_list/"+userId+"/"+faker_type_id, 
+        response = await client.get(f"{MICRO_SERVICE_URL}/faker_content_list/"+userId+"/"+faker_type_id, 
             headers={"X-API-KEY": os.getenv("API_KEY")},)
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
@@ -87,7 +88,7 @@ async def get_faker_name_list(request: Request,faker_type_id: str, userId: str =
     return JSONResponse( response.json())
 
 
-@router.post("/microservice/insert_faker_type")
+@router.put("/microservice/insert_faker_type")
 async def insert_faker_type(request: Request, userId: str = Depends(get_session_token)):
     body = await request.json()
     faker_type_name = body.get("faker_type_name", None)
