@@ -42,7 +42,7 @@ async def generate_dataset_config(request: Request, userId: str = Depends(get_se
     body = await request.json()
     json_sample = body.get("json_sample", None)
     
-    if not json_sample:
+    if not json_sample or userId:
         raise HTTPException(
             status_code=400,
             detail="json_sample is required",
