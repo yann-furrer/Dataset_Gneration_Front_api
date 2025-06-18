@@ -24,7 +24,6 @@ async def dev_token(request: Request, user_id: str = Depends(get_session_token))
 
 
 
-router = APIRouter()
 user_connections = {}
 
 @router.get("/dev/sse/{token}")

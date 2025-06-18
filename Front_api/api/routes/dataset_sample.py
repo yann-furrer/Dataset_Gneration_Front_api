@@ -91,7 +91,7 @@ async def get_faker_name_list(request: Request,faker_type_id: str, userId: str =
 @router.put("/microservice/insert_faker_type")
 async def insert_faker_type(request: Request, userId: str = Depends(get_session_token)):
     body = await request.json()
-    faker_type_name = body.get("faker_type_name", None)
+    faker_type_name = body.get("faker_name", None)
     faker_type_id = body.get("faker_type_id", None)
     faker_list = body.get("faker_list", None)
     category = body.get("category", None)
@@ -100,7 +100,7 @@ async def insert_faker_type(request: Request, userId: str = Depends(get_session_
         print("micro service url:", MICRO_SERVICE_URL)
         response = await client.put(f"{MICRO_SERVICE_URL}/insert_faker_type", 
             headers={"X-API-KEY": os.getenv("API_KEY")},
-            json={"client_id": userId, "faker_type_name": faker_type_name, "faker_type_id": faker_type_id, "faker_list": faker_list, "category": category, "description": "None"})
+            json={"client_id": userId, "faker_name": faker_type_name, "faker_type_id": faker_type_id, "faker_list": faker_list, "category": category, "description": "None"})
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
         
