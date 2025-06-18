@@ -104,16 +104,16 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
                             max_tokens=40, temperature=0, response_format="text"
                             )
             
-        
-        faker_category = json.loads(faker_category)
-        print("find_category : ", faker_category)
+            
+       
+        # faker_category = json.loads(faker_category)
         faker_type_id = str(uuid.uuid4().hex[:12] )
         if not faker_type_name and not faker_type_id and not faker_list and not client_id and not faker_category:
             raise ValueError("Nom, ID et valeurs requises pour l'insertion.")
         # Implémentation de l'insertion dans la base de données MongoDB
         response : bool = self.add_one({"faker_type_name": faker_type_name, "client_id": client_id, 
                 "faker_type_id": faker_type_id, "description": "No description",
-                "category": faker_category["category"], "list": faker_list})
+                "category": faker_category, "list": faker_list})
         
         return [response, faker_type_id]
 
@@ -171,8 +171,8 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
             faker_data :str = await self.make_api_call(str(elem_to_analyze), system_message=prompts_list[1], max_tokens=150, temperature=1, response_format="text")
             faker_info = json.loads(faker_info)
             faker_data = self.clean_string(faker_data) # Nettoyage de la chaîne pour s'assurer qu'elle est au format JSON valide
-
-            self.insert_faker_type_on_mongo_db(
+            print(faker_info)
+            await self.insert_faker_type_on_mongo_db(
                 faker_type_name=faker_info.get("name", None),
                 faker_list=faker_data,  # La liste sera remplie par la suite
                 faker_category=faker_info.get("category", None),  # Utilise la catégorie par défaut si non trouvée
