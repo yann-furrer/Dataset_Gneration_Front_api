@@ -17,10 +17,13 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    # allow_credentials=True,
     access_control_allow_origin=origins,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    # allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    # allow_headers=["Content-Type", "Authorization"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Inclusion des routes
