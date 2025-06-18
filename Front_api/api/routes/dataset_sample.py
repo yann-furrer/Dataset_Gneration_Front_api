@@ -49,7 +49,7 @@ async def generate_dataset_config(request: Request, userId: str = Depends(get_se
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=15) as client:
         print("micro service url:", MICRO_SERVICE_URL)
         response = await client.post(f"{MICRO_SERVICE_URL}/generate_webconfig", 
             headers={"X-API-KEY": os.getenv("API_KEY")},
