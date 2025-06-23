@@ -198,9 +198,10 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
             faker_type_name (str): Le nom du type faker à vérifier.
             client_id (str): L'ID du client pour lequel le type faker est associé.
         """
-        if not faker_type_name or not client_id:
+        print("value", faker_type_name)
+        if not faker_type_name:
             raise ValueError("Nom et ID du client requis pour la vérification.")
-
+        print("--->", self.faker_category_keys)
         check_faker_info = await self.make_api_call(str(faker_type_name), 
                         system_message=prompts_list[2].replace("{liste categories}", str(self.faker_category_keys)), 
                         max_tokens=120, temperature=0, response_format="text"
@@ -208,18 +209,30 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         check_faker_info = json.loads(check_faker_info)
         print("check_faker_info", check_faker_info)
         if check_faker_info["newCategory"] == False: # cas ou la catégorie existe déjà  
-            function_name = await self.make_api_call(str(faker_type_name), 
-                        system_message=prompts_list[3].replace("{fonction}", str(self.faker_category_list[check_faker_info["category"]])), 
-                        max_tokens=120, temperature=1, response_format="text"
-                        )
+
+            # print("faker-catagory list ", self.faker_category_list)
+            print(check_faker_info["category"])
+
+
+            if check_faker_info["category"] == "id":
+                print ("id attention")
+                check_faker_info.update({"function": "id"})
+                print("check_faker_info", check_faker_info)
+            if check_faker_info["category"] in self.faker_category_list and check_faker_info["category"] != "id":
+                print ("dans la liste")
+                function_name = await self.make_api_call(str(faker_type_name), 
+                            system_message=prompts_list[3].replace("{fonction}", str(self.faker_category_list[check_faker_info["category"]])), 
+                            max_tokens=120, temperature=1, response_format="text"
+                    )
                 
-            print("function_name", function_name)
-            if function_name != "empty":
-                check_faker_info.update({"function": function_name})
-                return check_faker_info
-            else : 
-                check_faker_info.update({"function": "empty"})
-                return check_faker_info
+                print("function_name", function_name)
+                if function_name != "empty":
+                    check_faker_info.update({"function": function_name})
+                    return check_faker_info
+                else : 
+                    check_faker_info.update({"function": "empty"})
+                    return check_faker_info
+            
         print(check_faker_info)
         return check_faker_info
         

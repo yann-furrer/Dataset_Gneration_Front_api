@@ -85,7 +85,7 @@ class WebConfigGenerator(FakerHandler):
         if isinstance(value, bool):
             return "boolean", None, [{"probability": 0.5}]
         if isinstance(value, (int, float)):
-            return "number", None, None
+            return "integer", None, None
 
         # Chaîne
         if isinstance(value, str):
@@ -125,9 +125,12 @@ class WebConfigGenerator(FakerHandler):
             return node
 
         if faker_type is not None:
-            print(f"Adding fakerType: {faker_type} for field: {fieldname}")
-            node["fakerType"] = faker_type
-            del node["type"]  # On n'a plus besoin de type si on a fakerType
+            if faker_type == "id": # Si le type id est detecté lors du passage 
+                node["type"] == "id"
+            else:
+                print(f"Adding fakerType: {faker_type} for field: {fieldname}")
+                node["fakerType"] = faker_type
+                node["type"]  # On n'a plus besoin de type si on a fakerType
         if rules is not None:
             node["rules"] = rules
 

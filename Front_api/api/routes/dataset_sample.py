@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 import httpx
 
 load_dotenv()
-MICRO_SERVICE_URL = "https://microservice-dataset-dev.up.railway.app"
+MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL")
 API_KEY = os.getenv("API_KEY")  # À changer/environner en production !
 # MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL",None)
 print("MICRO_SERVICE_URL:", MICRO_SERVICE_URL)
@@ -41,8 +41,8 @@ async def dataset_sample(request: Request, userId: str = Depends(get_session_tok
 async def generate_dataset_config(request: Request, userId: str = Depends(get_session_token)):
     body = await request.json()
     json_sample = body.get("json_sample", None)
-    
-    if not json_sample or userId:
+    print("json_sample:", json_sample, "userId:", userId)
+    if not json_sample :
         raise HTTPException(
             status_code=400,
             detail="json_sample is required",
@@ -51,6 +51,7 @@ async def generate_dataset_config(request: Request, userId: str = Depends(get_se
 
     async with httpx.AsyncClient(timeout=15) as client:
         print("micro service url:", MICRO_SERVICE_URL)
+
         response = await client.post(f"{MICRO_SERVICE_URL}/generate_webconfig", 
             headers={"X-API-KEY": os.getenv("API_KEY")},
             json={"client_id": userId, "json_sample": json_sample})

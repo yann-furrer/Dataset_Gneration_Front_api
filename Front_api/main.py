@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+import httpx, os
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
 from api.routes import sse, dev_token, user, dataset, dataset_sample
-
+load_dotenv()
 app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,6 +35,18 @@ app.include_router(dev_token.router)
 app.include_router(dataset.router)
 app.include_router(dataset_sample.router)
 
+
 @app.get("/welcome")
 async def welcome():
     return {"message": "Welcome to the FastAPI API"}
+
+@app.get("/ping_microservice")
+async def ping_microservice():
+    async with httpx.AsyncClient() as client:
+        MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL")
+        print("micro service url:", MICRO_SERVICE_URL)
+        response = await client.get(f"{MICRO_SERVICE_URL}/pinged_microservice", headers={"X-API-KEY": os.getenv("API_KEY")})
+        print("response:", response.json())
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        return response.json()

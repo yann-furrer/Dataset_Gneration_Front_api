@@ -34,7 +34,9 @@ async def read_root():
     return {"msg": "Accès autorisé"}
 
 
-
+@app.get("/pinged_microservice")
+async def ping_microservice():
+    return {"message": "pong"}
 
 @app.get("/dataset_microservice", dependencies=[Depends(verify_api_key)])
 async def get_dataset():
@@ -57,6 +59,7 @@ async def get_dataset(request: Request):
         body = await request.json()
         client_id = body.get("client_id", None)
         json_sample = body.get("json_sample", None)
+        print(json_sample)
         if not client_id:
             raise HTTPException(
                 status_code=400,
