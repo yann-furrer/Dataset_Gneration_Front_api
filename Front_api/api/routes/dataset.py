@@ -68,10 +68,11 @@ async def get_dataset_historical(userId : str = Depends(get_session_token), page
         # get_dataset_info
     result_request = select_dataset_for_historical(userId, page_number)
     if result_request != False:
-        # for item in result_request:
-        #     print("item -->", item)
-        #     item.update( {"S3_URL" : s3_manager.generate_presigned_url(item["clientId"], item["datasetName"])})
-        #     del item["clientId"]
+        for item in result_request:
+            if item["status"] == "success":
+                print("item -->", item)
+                item.update( {"S3_URL" : s3_manager.generate_presigned_url(item["clientId"], item["datasetNameSystem"])})
+                del item["clientId"]
         return result_request
     else:
         raise HTTPException(
@@ -178,6 +179,8 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
     nbRows = body.get("nbRows" , 1)
     function = body.get("function" , "preprocessing_generation") # description of the function to be executed on the celery queue
     body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
+    faker_name_dict = body.get("faker_name_dict" , [])
+    print("--> faker_name_dict",faker_name_dict)
 
   
     inserting_dataset_info(dataset_row_id ,dataset_config_id, userId, campaignid, "waiting",  nbRows, dataset_name)
@@ -190,7 +193,7 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
         )    
 
         # Ajout de la tache dans la queue rabbitmq
-    send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id))
+    send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id, faker_name_dict=faker_name_dict))
     return {f"message": "Dataset {dataset_name} ajouter à queue !"}
 
 
@@ -202,15 +205,17 @@ async def update_finished_dataset_info(request: Request ):
 
     """
     body = await request.json()
-    datasetId = body.get("datpoasetId" , None)
-    if datasetId == None:
+    datasetId = body.get("datasetId" , None)
+    dataset_name = body.get("dataset_name" , None)
+    status = body.get("status" , "unknown")
+    if None in [datasetId, dataset_name, status]:
         raise HTTPException(
             status_code=400,
             detail="Missing required fields in the request body",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    result_request = update_finished_dataset(datasetId, body.get("generationError" , "0"), body.get("status" , "unknown"))
+    result_request = update_finished_dataset(dataset_name, datasetId, body.get("generationError" , "0"), status)
 
     if result_request != None:
         return {"message": "Dataset updated !"}

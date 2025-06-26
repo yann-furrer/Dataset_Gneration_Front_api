@@ -125,13 +125,15 @@ SET
     "FinishedAt" = NOW(),
     "generationError" = :generationError,
     "status" = :status,
+    "datasetNameSystem" = :dataset_name_system,
      "TimeToGenerate" = (ROUND(EXTRACT(EPOCH FROM (NOW() - (SELECT "createdAt" FROM public."Dataset" WHERE "id" = :id)))) / 60)::integer
 WHERE "id" = :id;
 """
+# dataset_name_system est le nom du dataset qui a été généré par le back et qui est stocké dans un s3
 
-def update_finished_dataset_info(row_id: str, generationError: str, status: str) -> bool:
+def update_finished_dataset_info(dataset_name_system: str,row_id: str, generationError: str, status: str) -> bool:
     try:
-        session.execute(text(UPDATE_FINISHED_DATASET_INFO), {"id": row_id, "generationError": generationError, "status": status})
+        session.execute(text(UPDATE_FINISHED_DATASET_INFO), {"id": row_id, "generationError": generationError, "status": status, "dataset_name_system": dataset_name_system})
         session.commit()
         return True
     except Exception as e:
@@ -207,7 +209,7 @@ def select_all_s3_url_by_campaign_from_dataset(compaignId: str, userId: str) -> 
     
 
 SELECT_DATASET_HISTORICAL_OFFSET = """
-SELECT "id", "nbRows", "datasetConfigId","ownerId", "campaignId", "status", "FinishedAt", "TimeToGenerate" , "datasetName"
+SELECT "id", "nbRows", "datasetConfigId","ownerId", "campaignId", "status", "FinishedAt", "TimeToGenerate" , "datasetName", "datasetNameSystem"
 FROM public."Dataset"
 WHERE "ownerId" = :ownerId
 ORDER BY "FinishedAt" DESC

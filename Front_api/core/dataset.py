@@ -86,7 +86,7 @@ def select_dataset_for_historical(userId: str, offset: int) -> dict:
     result_request = select_dataset_historical_offset(userId, offset)
     data_dict = [
     {"id": item[0], "nbRows": item[1], "datasetConfigId": item[2],"clientId": item[3], "campaignId": item[4],
-    "status": item[5], "FinishedAt": item[6], "TimeToGenerate": item[7], "datasetName": item[8]}
+    "status": item[5], "FinishedAt": item[6], "TimeToGenerate": item[7], "datasetName": item[8],"datasetNameSystem": item[9]}
                 for item in result_request
                 ]
     return data_dict
@@ -119,14 +119,14 @@ def inserting_dataset_info(dataset_row_id, datasetConfigId: int, ownerId: str, c
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-def update_finished_dataset(datasetId: str, generationError: str, status: str) -> bool:
+def update_finished_dataset(dataset_name: str, datasetId: str, generationError: str, status: str) -> bool:
     """
     Update finished dataset
     """
     print("datasetId -->", datasetId)
     print("generationError -->", generationError)
     print("status -->", status)
-    reuslt_request = update_finished_dataset_info(datasetId, generationError, status)
+    reuslt_request = update_finished_dataset_info(dataset_name,datasetId, generationError, status)
 
     if reuslt_request == True:
         return True

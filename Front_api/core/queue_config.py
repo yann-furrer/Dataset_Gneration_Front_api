@@ -21,6 +21,7 @@ class TaskSchema(TypedDict):
     client_id: str
     end_format: str = "json"
     yaml_content : dict
+    faker_name_list : Optional[list]
     rules: Optional[dict]
 
 # Utilisation
