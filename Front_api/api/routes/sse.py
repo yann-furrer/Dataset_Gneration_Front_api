@@ -16,7 +16,7 @@ async def sse(user_id: str):
         try:
             while True:
                 message = await user_connections[user_id].get()
-                yield f"data: {json.dumps({'message': message})}\n\n"
+                yield f"data: {json.dumps(message)}\n\n"
         except asyncio.CancelledError:
             del user_connections[user_id]
 

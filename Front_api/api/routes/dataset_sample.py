@@ -70,7 +70,7 @@ async def get_faker_name_list(request: Request, userId: str = Depends(get_sessio
             headers={"X-API-KEY": os.getenv("API_KEY")},)
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
-        
+    
     return JSONResponse( response.json())
 
 
