@@ -26,6 +26,7 @@ def insert_subscription(userId : str, currentPeriodEnd : str, suscriptionType : 
         session.commit()
         return True
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
     
@@ -39,6 +40,7 @@ def update_quota_used(userId : str, new_quota_used_to_sum : int) -> bool:
         session.commit()
         return True
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
     

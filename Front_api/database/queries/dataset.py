@@ -22,6 +22,7 @@ def insert_dataset_config(datasetId: str, userId: str,  yamlName: str, yamlConte
         session.commit()
         return True
     except Exception as e:
+        session.rollback()
         print("Error while inserting dataset config", e)
         return False
     
@@ -73,6 +74,7 @@ def insert_rules_config(rulesId: str, userId: str,  rulesName: str, rulesContent
             return True
         
     except Exception as e:
+        session.rollback()
         print("Error while inserting rules config", e)
         return False
 
@@ -89,6 +91,7 @@ def select_dataset_config(datasetId: str, userId: str) -> bool:
         result = request.fetchone()
         return result
     except Exception as e:
+        session.rollback()
         print(f"Error while selecting dataset config from user {userId}", e)
         return False
     
@@ -115,6 +118,7 @@ def insert_dataset_info(dataset_row_id: str, datasetConfigId: int, ownerId: str,
             session.commit()
         return True
     except Exception as e:
+        session.rollback()
         print("Error while inserting dataset info", e)
         return False
     
@@ -137,6 +141,7 @@ def update_finished_dataset_info(dataset_name_system: str,row_id: str, generatio
         session.commit()
         return True
     except Exception as e:
+        session.rollback()
         print("Error while updating dataset info", e)
         return False
     
@@ -157,6 +162,7 @@ def update_dataset_status_info(row_id: str, status: str) -> bool:
         session.commit()
         return True
     except Exception as e:
+        session.rollback()
         print("Error while updating dataset info", e)
         return False
 
@@ -175,6 +181,7 @@ def update_status_dataset_info(datasetId: str, status: str, generationError: str
         return True
     except Exception as e:
         print("Error while updating dataset info", e)
+        session.rollback()
         return False
     
 
@@ -190,6 +197,7 @@ def select_all_s3_url_from_dataset(userId: str) -> dict:
         return result
     except Exception as e:
         print(f"Error while selecting all s3Url from dataset with this user", e)
+        session.rollback()
         return False
 
 
@@ -204,6 +212,7 @@ def select_all_s3_url_by_campaign_from_dataset(compaignId: str, userId: str) -> 
         result = request.fetchone()
         return result
     except Exception as e:
+        session.rollback()
         print(f"Error while selecting all s3Url from dataset {compaignId}", e)
         return False
     
@@ -230,6 +239,7 @@ def select_dataset_historical_offset(userId: str, offset: int) -> dict:
         return result
     except Exception as e:        
         print(f"Error while selecting dataset historical {userId}", e)
+        session.rollback()
         return False
     
 

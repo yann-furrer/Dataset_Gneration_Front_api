@@ -16,6 +16,7 @@ def select_dev_token_info(token : str) -> bool:
         row = result.fetchone()
         return row
     except Exception as error:
+        session.rollback()
         print("error -->",error)
         return False
 
@@ -37,6 +38,7 @@ def insert_api_token(userId : str, token : str, tokenPreview : str, quotaUsed : 
         session.commit()
         return True
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False   
     
@@ -55,6 +57,7 @@ def delete_api_token(token_id : str) -> bool:
         session.commit()
         return True
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
 
@@ -73,6 +76,7 @@ def update_quota_used(token_id : str, new_quota_used_to_sum : int) -> bool:
         session.commit()
         return True
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
 

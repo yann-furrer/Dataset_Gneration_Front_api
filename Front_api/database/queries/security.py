@@ -26,6 +26,7 @@ def check_session_token(token):
         result = request.fetchone()
         return result[0]
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
     
@@ -42,6 +43,7 @@ def check_user_api_token(token):
         result = request.fetchone()
         return result[0]
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
 
@@ -58,5 +60,6 @@ def check_user_suscription_limit(userId: str) -> bool:
         result = request.fetchone()
         return result
     except Exception as error:
+         session.rollback()
          print("error -->",error)
          return False
