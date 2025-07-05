@@ -10,7 +10,7 @@ from core.queue_config import send_message_to_celery_queue, TaskSchema
 from core.checking import check_user_limit_credit, get_session_token
 from core.user import insert_subscription
 #import pour la table dataset config
-from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset, insert_rules_config_info, insert_dataset_config_and_rules_config_info
+from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset, insert_rules_config_info, insert_dataset_config_and_rules_config_info, select_dataset_config_and_rules_config
 #import pour la table Dataset
 from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical, update_finished_dataset, update_status_dataset
 
@@ -180,7 +180,7 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
     function = body.get("function" , "preprocessing_generation") # description of the function to be executed on the celery queue
     body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
     faker_name_dict = body.get("faker_name_dict" , [])
-    print("--> faker_name_dict",faker_name_dict)
+    # print("--> faker_name_dict",faker_name_dict)
 
   
     inserting_dataset_info(dataset_row_id ,dataset_config_id, userId, campaignid, "waiting",  nbRows, dataset_name)
@@ -253,3 +253,19 @@ async def update_dataset_status(request: Request ):
             detail="Error while updating dataset",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+@router.get("/dataset/get_config_info")
+async def get_config_info(datasetId: str, userId : str = Depends(get_session_token)):
+    """
+    Get dataset config
+    """
+    if datasetId == None:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing required fields in the request body",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    result_request = select_dataset_config_and_rules_config(datasetId, userId)
+    print("result_request -->", result_request)
+    if result_request != None:
+        return result_request

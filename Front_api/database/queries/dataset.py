@@ -247,7 +247,7 @@ def select_dataset_historical_offset(userId: str, offset: int) -> dict:
 
 
 SELECT_DATASET_CONFIG_HISTORICAL_OFFSET = """
-SELECT "datasetId", "yamlName", "yamlContent", "draftResult", "rulesId", "nbRows", "campaignId", "createdAt"
+SELECT "datasetId", "yamlName", "draftResult", "rulesId", "nbRows", "campaignId", "createdAt"
 FROM public."DatasetConfig"
 WHERE "userId" = :userId 
 ORDER BY "createdAt" DESC
@@ -272,3 +272,23 @@ def select_dataset_historical_config_offset(userId: str, offset: int) -> dict:
         return False
     
 
+SELECT_YAML_CONTENT_BY_DATASET_CONFIG_ID = """
+SELECT "yamlContent" FROM public."DatasetConfig" WHERE "datasetId" = :datasetId AND "userId" = :userId;
+"""
+
+SELECT_RULES_CONTENT_BY_DATASET_CONFIG_ID = """
+SELECT "rulesContent" FROM public."RulesConfig" WHERE "datasetConfigId" = :datasetConfigId AND "userId" = :userId;
+"""
+def select_yaml_and_rules_content_by_dataset_config_id(datasetId: str, userId: str) -> dict:
+    try:
+        request_yaml = session.execute(text(SELECT_YAML_CONTENT_BY_DATASET_CONFIG_ID), {"datasetId": datasetId, "userId": userId})
+        result_yaml = request_yaml.fetchone()
+        
+       
+        request_rules = session.execute(text(SELECT_RULES_CONTENT_BY_DATASET_CONFIG_ID), {"datasetConfigId": datasetId, "userId": userId})
+        result_rules = request_rules.fetchone()
+        return {"yamlContent":  dict(result_yaml._mapping)["yamlContent"] if result_yaml else [], "rulesContent": dict(result_rules._mapping)["rulesContent"] if result_rules else []}
+    except Exception as e:
+        session.rollback()
+        print(f"Error while selecting yaml content by dataset config id {datasetId}", e)
+        return False

@@ -3,7 +3,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import  HTTPException
 from fastapi.security import HTTPBearer
 #datasetConfig and rulesConfig
-from database.queries.dataset import insert_dataset_config, select_dataset_config, update_finished_dataset_info, select_dataset_historical_config_offset, insert_rules_config
+from database.queries.dataset import insert_dataset_config, select_dataset_config, update_finished_dataset_info, select_dataset_historical_config_offset, insert_rules_config, select_yaml_and_rules_content_by_dataset_config_id
 #dataset
 from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset, update_dataset_status_info
 
@@ -93,7 +93,15 @@ def select_dataset_for_historical(userId: str, offset: int) -> dict:
 
 
 
-
+def select_dataset_config_and_rules_config(datasetId: str, userId: str) -> dict:
+    result_request = select_yaml_and_rules_content_by_dataset_config_id(datasetId, userId)
+    if result_request == False or result_request == None or result_request["yamlContent"] == []:
+         HTTPException(
+            status_code=400,
+            detail="Error while getting dataset config or rules config",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return result_request
 
 
 
@@ -109,7 +117,7 @@ def inserting_dataset_info(dataset_row_id, datasetConfigId: int, ownerId: str, c
     Insert new dataset info in dataset
     """
     result_request = insert_dataset_info(dataset_row_id, datasetConfigId, ownerId, campaingId, status, nbRows, datasetName)
-
+    print("result_request -->", result_request)
     if result_request == True:
         return True
     else:
@@ -186,7 +194,7 @@ def get_dataset_config_historical_offset(userId: str, offset: int) -> dict:
     result_request = select_dataset_historical_config_offset(userId, offset)
     if result_request != None:
         data_dict = [
-        {"datasetId": item[0], "yamlName": item[1], "yamlContent": item[2], "draftResult": item[3], "ruleId": item[4], "nbrows": item[5], "compaignId": item[6], "createdAt": item[7]}
+        {"datasetId": item[0], "yamlName": item[1], "draftResult": item[2], "rulesId": item[3], "nbRows": item[4], "campaignId": item[5], "createdAt": item[6]}
             for item in result_request
             ]
         return data_dict
