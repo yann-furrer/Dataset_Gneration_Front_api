@@ -3,3 +3,5 @@ dataset_microservice/api_config/__pycache__/
 dataset_microservice/utils/__pycache__/
 dataset_microservice/generator/__pycache__/
 dataset_microservice/.env
+.idx/dev.nix
+.vscode/settings.json
