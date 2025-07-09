@@ -1,8 +1,7 @@
 import httpx, os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-# from api.routes import sse, dev_token, user, dataset, dataset_sample
-from routes import dev_token
+from routes import dev_token, dataset
 load_dotenv()
 app = FastAPI()
 

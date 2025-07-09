@@ -14,6 +14,7 @@ from core.queue_config import send_message_to_celery_queue, TaskSchema
 router = APIRouter()
 security = HTTPBearer()  
 
+#stock tout les processus de génération en cours
 generation_processes_list = {}
 
 def delete_generation_process(process_id: str, status: str) -> bool:
@@ -56,6 +57,7 @@ async def generate_dataset(request : Request, _ : str = Depends(check_user_api_t
     send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=process_id, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id, faker_name_dict=faker_name_dict, request_type="dev"))
     # Ajout de la tache dans la liste des taches en cours
     generation_processes_list[str(process_id)] = "waiting"
+    print(generation_processes_list)
     return {f"message": "Dataset {dataset_name} ajouter à queue ! with process_id {process_id}", "process_id": process_id}
 
 
@@ -81,11 +83,10 @@ async def update_process_status(request: Request, process_id: str):
     return {"message": "Generation process updated !"}
 
 
-# Cette route est pingée par le back pour vérifier si le process_id est valide
-@router.get("/dev/get_generation_status/{process_id}")
-async def get_generation_status(process_id: str, _  = Depends(check_dev_token)):
+@router.get("/dev/ping_generation_process/{process_id}")
+async def ping_generation_process(process_id: str, _  = Depends(check_dev_token)):
     """
-    get_generation_status
+    ping_generation_process
 
     """
     status = generation_processes_list.get(process_id, None)
@@ -95,5 +96,13 @@ async def get_generation_status(process_id: str, _  = Depends(check_dev_token)):
             detail="Error while getting generation status youe process_id is not valid",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    process_info = generation_processes_list.get(process_id, None)
     
-    return status
+    if process_info == None:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while getting generation status youe process_id is not valid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return {process_info}

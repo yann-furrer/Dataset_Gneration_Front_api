@@ -3,8 +3,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
-from database.queries.security import check_session_token, check_user_token
-from database.queries.dev_api import select_dev_token_info
+from database.queries.security import select_validity_token, check_existing_dev_token, check_session_token
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 load_dotenv()
@@ -18,35 +17,35 @@ security = HTTPBearer()
 
 
 def check_dev_token(token):
-    bool_response =check_session_token(token)
+    bool_response =check_existing_dev_token(token)
     if bool_response == False:
         raise HTTPException(
             status_code=401,
             detail="Session token not found or invalid",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    return bool_response
 
 def check_user_api_token(token : str, nb_rows_to_generate : int) -> bool:
     """
     Vérifie si le token est valide
     """
     try :
-        token_info = check_user_token(token)
+        token_info = select_validity_token(token)
+        if token_info == False:
+            raise HTTPException(
+                status_code=401,
+                detail="Token not found or invalid",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         #Une marge de 10% est ajoutée pour ne pas avoir de problème de calcul en la faveur du clientr
-        if (nb_rows_to_generate + token_info["quotaUsed"]) > token_info["limit"] * 1.10:
+        if (nb_rows_to_generate + token_info["quotaUsed"]) > token_info["limit"] * 1.10 and datetime.now() < token_info["expireAt"]:
             raise HTTPException(
                 status_code=400,
                 detail=" Not enough credit",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-
-        if token_info == False:
-            raise HTTPException(
-                status_code=400,
-                detail=" Token not found or invalid",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
         if token_info["expire"] < datetime.now():
             raise HTTPException(
                 status_code=400,
