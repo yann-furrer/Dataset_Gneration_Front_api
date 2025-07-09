@@ -58,6 +58,7 @@ def check_user_api_token(token : str, nb_rows_to_generate : int) -> bool:
                 detail=" Not enough credit",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+            return True
         
     
     except Exception as e:
@@ -67,6 +68,7 @@ def check_user_api_token(token : str, nb_rows_to_generate : int) -> bool:
             detail="User subscription not found or invalid",
             headers={"WWW-Authenticate": "Bearer"},
         )   
+        return False
 
 
 
@@ -86,6 +88,24 @@ async def get_session_token(request: Request) -> str:
         )
     return userId
 
+
+async def get_dev_token_info(request: Request) -> str:
+    """
+    Extrait le token de session du header 'sessiontoken'.
+    """
+    body_data = await request.json()
+    token = body_data.get("token" , None)
+    nb_rows_to_generate = body_data.get("nb_rows" , 0)
+
+    token_check : bool = check_dev_token(token)
+    print("token_check -->", token_check)
+    if token_check == False:
+        raise HTTPException(
+            status_code=401,
+            detail="Session token not found or invalid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return token_check
 
 
 # async def check_user_limit_credit(request: Request, userId: str = Depends(get_session_token)) -> bool:
