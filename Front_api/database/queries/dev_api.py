@@ -7,7 +7,7 @@ from config import *
 
 
 SELECT_DEV_TOKEN = """
-SELECT  "quotaUsed", "price", "limit"  FROM public."API_handle" WHERE "token" = :token;
+SELECT  "quotaUsed", "price", "limit"  FROM public."APIHandle" WHERE "token" = :token;
 """
 
 def select_dev_token_info(token : str) -> bool:
@@ -20,10 +20,10 @@ def select_dev_token_info(token : str) -> bool:
         print("error -->",error)
         return False
 
-# SELECT "userId", "quotaUsed", "price", "limit"  FROM public."API_handle" WHERE "token" = :token;
+# SELECT "userId", "quotaUsed", "price", "limit"  FROM public."APIHandle" WHERE "token" = :token;
 # requete d'insertion des tokens
 INSERT_DEV_TOKEN = """
-INSERT INTO public."API_handle" ("userId", "token", "tokenPreview", "quotaUsed", "price", "limit", "createdAt", "updatedAt") 
+INSERT INTO public."APIHandle" ("userId", "token", "tokenPreview", "quotaUsed", "price", "limit", "createdAt", "updatedAt") 
 VALUES (:userId, :token, :tokenPreview, :quotaUsed, :price, :limit, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 """
 
@@ -46,7 +46,7 @@ def insert_api_token(userId : str, token : str, tokenPreview : str, quotaUsed : 
 
 # requete de suppression des tokens
 DELETE_DEV_TOKEN = """
-DELETE FROM public."API_handle" WHERE "id" = :id;
+DELETE FROM public."APIHandle" WHERE "id" = :id;
 """
 def delete_api_token(token_id : str) -> bool:
     """
@@ -64,7 +64,7 @@ def delete_api_token(token_id : str) -> bool:
 
 #requete de modification du quota utilisé
 UPDATE_QUOTA_DEV_TOKEN = """
-UPDATE public."API_handle" SET "quotaUsed" =  "quotaUsed" + :new_quota_used_to_sum, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = :token_id;
+UPDATE public."APIHandle" SET "quotaUsed" =  "quotaUsed" + :new_quota_used_to_sum, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = :token_id;
 """
 
 def update_quota_used(token_id : str, new_quota_used_to_sum : int) -> bool: 

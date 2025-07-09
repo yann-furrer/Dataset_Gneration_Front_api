@@ -15,6 +15,7 @@ CELERY_QUEUE_NAME = "celery"
 #Schema de contenue de la tache
 class TaskSchema(TypedDict):
     id: str
+
     dataset_id_row: str
     function: int
     dataset_name: str
@@ -23,6 +24,8 @@ class TaskSchema(TypedDict):
     yaml_content : dict
     faker_name_list : Optional[list]
     rules: Optional[dict]
+    request_type: Optional[str]
+
 
 # Utilisation
 task: TaskSchema = {

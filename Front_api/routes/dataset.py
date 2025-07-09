@@ -193,7 +193,7 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
         )    
 
         # Ajout de la tache dans la queue rabbitmq
-    send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id, faker_name_dict=faker_name_dict, request_type="api"))
+    send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=userId, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id, faker_name_dict=faker_name_dict))
     return {f"message": "Dataset {dataset_name} ajouter à queue !"}
 
 

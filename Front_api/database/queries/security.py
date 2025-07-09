@@ -31,7 +31,7 @@ def check_session_token(token):
          return False
     
 CHECK_API_TOKEN = """
-SELECT "userId", "quotaUsed", "price", "limit"  FROM public."API_handle" WHERE "token" = :token;
+SELECT "userId", "quotaUsed", "price", "limit"  FROM public."APIHandle" WHERE "token" = :token;
 """
 
 def check_user_api_token(token):

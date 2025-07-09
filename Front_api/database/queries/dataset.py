@@ -20,6 +20,7 @@ def insert_dataset_config(datasetId: str, userId: str,  yamlName: str, yamlConte
     try:
         session.execute(text(INSERT_ON_CONFLICT_DATASET_CONFIG), {"datasetId": datasetId, "userId": userId, "yamlName": yamlName, "yamlContent": yamlContent, "draftResult": draftResult, "nbRows": nbRows})
         session.commit()
+        
         return True
     except Exception as e:
         session.rollback()

@@ -12,7 +12,7 @@ INSERT INTO public."Suscription"(
 	VALUES (:userId, :stripeCustomerId, :stripeSubscriptionId, :stripePriceId, :status, :currentPeriodEnd, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :suscriptionType, :nbRowsMaxSuscribed);
 """
 UPDATE_USER_QUOTA_USED = """
-UPDATE public."API_handle" SET "quotaUsed" =  "quotaUsed" + :new_quota_used_to_sum, "updatedAt" = CURRENT_TIMESTAMP WHERE "userId" = :userId;
+UPDATE public."APIHandle" SET "quotaUsed" =  "quotaUsed" + :new_quota_used_to_sum, "updatedAt" = CURRENT_TIMESTAMP WHERE "userId" = :userId;
 """
 
 
