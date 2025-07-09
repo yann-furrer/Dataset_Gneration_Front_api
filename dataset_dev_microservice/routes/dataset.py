@@ -6,7 +6,7 @@ from fastapi.security import  HTTPBearer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from core.queue_config import send_message_to_celery_queue, TaskSchema
-from core.checking import  check_user_api_token, check_dev_token
+from core.checking import  check_dev_token_validity, check_dev_token, get_dev_token_info
 
 from core.queue_config import send_message_to_celery_queue, TaskSchema
 
@@ -25,42 +25,119 @@ def delete_generation_process(process_id: str, status: str) -> bool:
         del generation_processes_list[process_id]
 
 
-@router.post("/dev/generate_dataset")
-async def generate_dataset(request : Request, _ : str = Depends(check_user_api_token)):
-    """
-    generate_dataset
+from fastapi import Body, status
 
-    """
-    process_id= uuid.uuid4()
-    celery_queue_id =uuid.uuid4()
+
+from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any
+import uuid
+
+class GenerateDatasetRequest(BaseModel):
+    end_format: str = Field(..., description="Format de sortie souhaité (ex: csv, json)")
+    yaml_content: Dict[str, Any] = Field(..., description="Contenu YAML sous forme d'objet JSON")
+    rulesContent: Optional[Dict[str, Any]] = Field(None, description="Règles optionnelles de génération")
+    campaignid: Optional[str] = Field(None, description="Identifiant de campagne, ignoré en mode dev")
+    function: Optional[str] = Field("preprocessing_generation", description="Nom de la fonction à exécuter")
+    faker_name_dict: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Variables faker personnalisées")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "end_format": "csv",
+                "yaml_content": {
+                    "datasetName": "ExempleDataset",
+                    "numberOfRecords": 100
+                },
+                "rulesContent": {},
+                "campaignid": None,
+                "function": "preprocessing_generation",
+                "faker_name_dict": {
+                    "faker_name": "company"
+                }
+            }
+        }
+
+class GenerateDatasetResponse(BaseModel):
+    message: str
+    process_id: str
+
+
+
+
+
+
+
+@router.post(
+    "/dev/generate_dataset",
+    summary="Ajoute un dataset à la queue de génération",
+    description=(
+        "Cette route permet de générer un jeu de données de test de manière asynchrone. "
+        "Elle valide le contenu YAML envoyé, ajoute la tâche à la file RabbitMQ, et retourne un `process_id` "
+        "permettant de suivre l'avancement via `/dev/ping_generation_process`."
+    ),
+    response_model=GenerateDatasetResponse,
+    response_description="ID du processus de génération et message de confirmation",
+    status_code=200,
+    responses={
+        400: {
+            "description": "Requête invalide : données manquantes ou incorrectes",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Missing required fields in the request body or None value"
+                    }
+                }
+            },
+        },
+        422: {
+            "description": "Erreur de validation des champs (types, format)",
+        },
+    },
+)
+async def generate_dataset(
+    request: Request,
+    api_key: str = Depends(get_dev_token_info),
+    body: GenerateDatasetRequest = Body(...)
+):
+    print("api_key -->", api_key)
+    process_id = uuid.uuid4()
+    celery_queue_id = uuid.uuid4()
     dataset_row_id = uuid.uuid4()
-    body = await request.json()
-    dataset_name = body.get("dataset_name" , "nom du dataset par defaut")
-    end_format = body.get("end_format" , None)
-    yamlContent = body.get("yaml_content" , None)
-    rulesContent = body.get("rulesContent" , None)
-    dataset_config_id = body.get("dataset_config_id" , None)
-    campaignid = body.get("campaignid" , None) # pour l'instant on ne prend pas en compte le campaignid
-    nbRows = body.get("nbRows" , 1)
-    function = body.get("function" , "preprocessing_generation") # description of the function to be executed on the celery queue
-    body_value_list = [process_id, end_format, yamlContent, dataset_config_id, nbRows]
-    faker_name_dict = body.get("faker_name_dict" , [])
-    draftResult = {"test": "test"}
-    if any(value == None for value in body_value_list):
+
+    end_format = body.end_format
+    yamlContent = body.yaml_content
+    dataset_name = yamlContent.get("datasetName")
+    nbRows = yamlContent.get("numberOfRecords", 1)
+    rulesContent = body.rulesContent
+    function = body.function
+    faker_name_dict = body.faker_name_dict
+
+    # Validation manuelle
+    if any(value is None for value in [process_id, end_format, yamlContent, nbRows]):
         raise HTTPException(
             status_code=400,
             detail="Missing required fields in the request body or None value",
-            headers={"WWW-Authenticate": "Bearer"},
-        )    
+        )
 
-        # Ajout de la tache dans la queue rabbitmq
-    send_message_to_celery_queue(TaskSchema(dataset_row_id=dataset_row_id, id=celery_queue_id, function=function, dataset_name=dataset_name, client_id=process_id, end_format=end_format, yaml_content=yamlContent, rules=rulesContent, dataset_config=dataset_config_id, faker_name_dict=faker_name_dict, request_type="dev"))
-    # Ajout de la tache dans la liste des taches en cours
+    send_message_to_celery_queue(
+        TaskSchema(
+            dataset_row_id=dataset_row_id,
+            id=celery_queue_id,
+            function=function,
+            dataset_name=dataset_name,
+            client_id=process_id,
+            end_format=end_format,
+            yaml_content=yamlContent,
+            rules=rulesContent,
+            dataset_config="__",
+            faker_name_dict=faker_name_dict,
+            request_type="dev"
+        )
+    )
+
     generation_processes_list[str(process_id)] = "waiting"
-    print(generation_processes_list)
+
     return {f"message": "Dataset {dataset_name} ajouter à queue ! with process_id {process_id}", "process_id": process_id}
-
-
 
 
 @router.post("/dev/update_process_status/{process_id}")
@@ -83,26 +160,51 @@ async def update_process_status(request: Request, process_id: str):
     return {"message": "Generation process updated !"}
 
 
-@router.get("/dev/ping_generation_process/{process_id}")
-async def ping_generation_process(process_id: str, _  = Depends(check_dev_token)):
-    """
-    ping_generation_process
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from fastapi import Query, HTTPException
+@router.get(
+    "/dev/ping_generation_process",
+    summary="Vérifie le statut d'un processus de génération",
+    description=(
+        "Cette route permet de vérifier le statut d'un dataset en cours de génération. "
+        "Le `process_id` est fourni en tant que paramètre de requête. "
+        "Un token développeur valide est requis pour accéder à cette route."
+    ),
+)
+async def ping_generation_process(
+    process_id: str = Query(..., description="Identifiant unique du processus de génération"),
+    _ = Depends(check_dev_token)
+):
     """
-    status = generation_processes_list.get(process_id, None)
-    if status == None:
+    Retourne le statut actuel d’un processus de génération de dataset initié via `/dev/generate_dataset`.
+
+    - **process_id** : l’identifiant du processus (UUID) retourné lors de l’appel initial.
+    - **status** peut être : `"waiting"`, `"running"`, `"success"`, `"error"`, ou `None` si le processus est inconnu.
+    """
+    print("process_id -->", process_id)
+    print("generation_processes_list -->", generation_processes_list)
+
+    status = generation_processes_list.get(process_id)
+    if status is None:
         raise HTTPException(
             status_code=400,
-            detail="Error while getting generation status youe process_id is not valid",
+            detail="Le process_id fourni est invalide ou expiré.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    process_info = generation_processes_list.get(process_id, None)
-    
-    if process_info == None:
-        raise HTTPException(
-            status_code=400,
-            detail="Error while getting generation status youe process_id is not valid",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    return {process_info}
+
+    return {"status": status}

@@ -16,17 +16,21 @@ router = APIRouter()
 security = HTTPBearer()  
 
 
-def check_dev_token(token):
-    bool_response =check_existing_dev_token(token)
+async def check_dev_token(request: Request) -> bool:
+    
+    param = request.query_params
+    token = param.get("api_key" , "None")
+    print("token -->", token)
+    bool_response = check_existing_dev_token(token)
     if bool_response == False:
         raise HTTPException(
             status_code=401,
-            detail="Session token not found or invalid",
+            detail="Le token de dev n'est pas reconnu",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return bool_response
 
-def check_user_api_token(token : str, nb_rows_to_generate : int) -> bool:
+def check_dev_token_validity(token : str, nb_rows_to_generate : int) -> bool:
     """
     Vérifie si le token est valide
     """
@@ -91,13 +95,16 @@ async def get_session_token(request: Request) -> str:
 
 async def get_dev_token_info(request: Request) -> str:
     """
-    Extrait le token de session du header 'sessiontoken'.
+    Extrait le token api du param 'api_key'.
     """
+    param = request.query_params
+    api_key = param.get("api_key" , "None")
+    print("api_key -->", api_key)
     body_data = await request.json()
-    token = body_data.get("token" , None)
-    nb_rows_to_generate = body_data.get("nb_rows" , 0)
+    # token = body_data.get("token" , "None")
+    nb_rows_to_generate = body_data.get("yaml_content" , {}).get("numberOfRecords" , 0)
 
-    token_check : bool = check_dev_token(token)
+    token_check : bool = check_dev_token(api_key)
     print("token_check -->", token_check)
     if token_check == False:
         raise HTTPException(

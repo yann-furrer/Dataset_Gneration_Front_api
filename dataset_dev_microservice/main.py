@@ -2,6 +2,7 @@ import httpx, os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from routes import dev_token, dataset
+from schema.dataset_shema import *
 load_dotenv()
 app = FastAPI()
 
@@ -28,3 +29,4 @@ app.add_middleware(
 )
 
 app.include_router(dev_token.router)
+app.include_router(dataset.router)

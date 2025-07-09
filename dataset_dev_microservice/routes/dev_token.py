@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 from fastapi import APIRouter, HTTPException, Request, Depends, Body
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-from core.checking import check_user_api_token, get_session_token
+from core.checking import check_dev_token_validity, get_session_token
 from core.dev_token import generate_token, insert_dev_token, delete_dev_token, list_dev_tokens, update_quota_used
 
 
@@ -43,7 +43,7 @@ async def update_token(token_id: str, limit: int, user_id: str = Depends(get_ses
 
 #route utiliser par le front pour mettre à jour le quota utilisé
 @router.post("/update_token_quota/{token}")
-async def update_token_used(token: str, new_quota_used_to_sum: int, user_id: str = Depends(get_session_token), _ = Depends(check_user_api_token)):
+async def update_token_used(token: str, new_quota_used_to_sum: int, user_id: str = Depends(get_session_token), _ = Depends(check_dev_token_validity)):
     response = update_quota_used(token, new_quota_used_to_sum)
     return {"message": "Dev token updated!"}
 

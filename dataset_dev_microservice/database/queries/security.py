@@ -42,7 +42,9 @@ def check_existing_dev_token(token):
     try:
         request = session.execute(text(CHECK_DEV_TOKEN), {"token": token})
         result = request.fetchone()
-        return result[0]
+        if result == None:
+            return False
+        return result
     except Exception as error:
          session.rollback()
          print("error -->",error)
