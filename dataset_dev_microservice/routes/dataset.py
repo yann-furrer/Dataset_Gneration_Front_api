@@ -1,14 +1,12 @@
 
 import os , sys, json, uuid
-from fastapi import APIRouter, HTTPException, Request, Depends, BackgroundTasks
 from fastapi.security import  HTTPBearer
-
+from fastapi import APIRouter, HTTPException, Request, Depends, BackgroundTasks, Body
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
+from schema.dataset_shema import *
 from core.queue_config import send_message_to_celery_queue, TaskSchema
 from core.checking import  check_dev_token_validity, check_dev_token, get_dev_token_info
-
-from core.queue_config import send_message_to_celery_queue, TaskSchema
 
 
 router = APIRouter()
@@ -25,51 +23,9 @@ def delete_generation_process(process_id: str, status: str) -> bool:
         del generation_processes_list[process_id]
 
 
-from fastapi import Body, status
-
-
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
-import uuid
-
-class GenerateDatasetRequest(BaseModel):
-    end_format: str = Field(..., description="Format de sortie souhaité (ex: csv, json)")
-    yaml_content: Dict[str, Any] = Field(..., description="Contenu YAML sous forme d'objet JSON")
-    rulesContent: Optional[Dict[str, Any]] = Field(None, description="Règles optionnelles de génération")
-    campaignid: Optional[str] = Field(None, description="Identifiant de campagne, ignoré en mode dev")
-    function: Optional[str] = Field("preprocessing_generation", description="Nom de la fonction à exécuter")
-    faker_name_dict: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Variables faker personnalisées")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "end_format": "csv",
-                "yaml_content": {
-                    "datasetName": "ExempleDataset",
-                    "numberOfRecords": 100
-                },
-                "rulesContent": {},
-                "campaignid": None,
-                "function": "preprocessing_generation",
-                "faker_name_dict": {
-                    "faker_name": "company"
-                }
-            }
-        }
-
-class GenerateDatasetResponse(BaseModel):
-    message: str
-    process_id: str
-
-
-
-
-
-
-
 @router.post(
     "/dev/generate_dataset",
-    summary="Ajoute un dataset à la queue de génération",
+    summary="Générer un dataset",
     description=(
         "Cette route permet de générer un jeu de données de test de manière asynchrone. "
         "Elle valide le contenu YAML envoyé, ajoute la tâche à la file RabbitMQ, et retourne un `process_id` "
@@ -182,8 +138,11 @@ from fastapi import Query, HTTPException
     summary="Vérifie le statut d'un processus de génération",
     description=(
         "Cette route permet de vérifier le statut d'un dataset en cours de génération. "
-        "Le `process_id` est fourni en tant que paramètre de requête. "
-        "Un token développeur valide est requis pour accéder à cette route."
+        "Le `process_id` est fourni en tant que paramètre de requête, il preivent de la requête de `/dev/generate_dataset`. "
+        "Un token développeur valide est requis pour accéder à cette route." \
+        "Le statut retourné peut être : `waiting`, `running`, `success`, `error`, ou `None` si le processus est inconnu."
+        "Lorsque le statut est `success`, un champs supplémentaire `s3_url` est retourné contenant le dataset généré. Attention, "
+        "ce champs n'est disponible que 15 minutes avant expiration"
     ),
 )
 async def ping_generation_process(

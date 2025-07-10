@@ -22,7 +22,7 @@ async def get_tokens_info(user_id: str = Depends(get_session_token)):
     response = list_dev_tokens(user_id)
     return response
 # Vérifie si le token est valide
-@router.get("/generate_token")
+@router.post("/generate_token")
 async def dev_token(user_id: str = Depends(get_session_token)):
     token = generate_token()
     limit = -1
