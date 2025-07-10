@@ -4,6 +4,7 @@ dataset_dev_microservice/routes/__pycache__/
 dataset_dev_microservice/database/__pycache__/
 dataset_dev_microservice/database/queries/__pycache__/
 dataset_dev_microservice/core/__pycache__/
+dataset_dev_microservice/schema/__pycache__/
 
 
 
