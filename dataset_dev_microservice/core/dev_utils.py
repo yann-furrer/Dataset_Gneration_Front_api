@@ -145,7 +145,7 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
                                 error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'range' : {rules.get('range')} n'est pas valide c'est une valeur entre -1 et 1.")
                                 
                 
-        if type_config in ("bool"):
+        if type_config in ("boolean"):
             for rule in rules:
                 if rule not in ("fieldName", "type", "rules"):
                     error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide.")

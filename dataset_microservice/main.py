@@ -85,6 +85,18 @@ async def get_faker_list(user_id: str):
     print("faker_types:", faker_types)
     return JSONResponse( faker_types)
 
+@app.get("/faker_name_list_front/{user_id}", dependencies=[Depends(verify_api_key)])
+async def get_faker_list(user_id: str):
+    """
+    Retourne la liste des des nom de fakerdisponibles pour le client.
+    """
+    print("user_id -->", user_id)
+    faker_types = faker_handler.find_many(filter_dict={ "client_id": user_id, "faker_type_name": { "$exists": True } }
+, projection_dict={"_id": 0, "faker_type_name":1})
+    faker_name_list = [item["faker_type_name"] for item in faker_types if "faker_type_name" in item]
+
+    return JSONResponse( faker_name_list)
+
 
 @app.get("/faker_content_list/{user_id}/{faker_type_id}", dependencies=[Depends(verify_api_key)])
 async def get_faker_content_list(user_id: str, faker_type_id: str):
