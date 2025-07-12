@@ -7,7 +7,7 @@ from database.queries.dataset import insert_dataset_config, select_dataset_confi
 #dataset
 from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset, update_dataset_status_info
 
-from utils.s3_handle import S3Manager
+# from utils.s3_handle import S3Manager
 
 
 

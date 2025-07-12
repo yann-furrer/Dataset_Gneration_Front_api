@@ -25,7 +25,7 @@ if DEV_SERVICE_URL is None:
     raise ValueError("DEV_SERVICE_URL is not set in the environment variables.")
 
 
-@router.get("/dev/generate_token")
+@router.post("/dev/generate_token")
 async def generate_dev_token(request: Request, userId: str = Depends(get_session_token)):
     session_token = dict(request.headers).get('sessiontoken')
     print("session_token -->", session_token)
@@ -33,41 +33,32 @@ async def generate_dev_token(request: Request, userId: str = Depends(get_session
     async with httpx.AsyncClient() as client:
         print("micro service url:", DEV_SERVICE_URL)
         response = await client.post(f"{DEV_SERVICE_URL}/generate_token", headers={"sessiontoken": session_token})
-        print("response:", response.json())
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
 
     return JSONResponse(response.json())
 
 
+@router.get("/dev/get_tokens_info")
+async def get_tokens_info (request: Request, userId: str = Depends(get_session_token)):
+    session_token = dict(request.headers).get('sessiontoken')
+    print("session_token -->", session_token)
+  
+    async with httpx.AsyncClient() as client:
+        print("micro service url:", DEV_SERVICE_URL)
+        response = await client.get(f"{DEV_SERVICE_URL}/get_tokens_info", headers={"sessiontoken": session_token})
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
 
-user_connections = {}
+    return JSONResponse(response.json())
 
-@router.get("/dev/sse/{token}")
-async def sse(user_id: str = Depends(get_session_token)):
-    if user_id not in user_connections:
-        user_connections[user_id] = asyncio.Queue()
-
-    async def event_generator():
-        try:
-            while True:
-                message = await user_connections[user_id].get()
-                yield f"data: {json.dumps({'message': message})}\n\n"
-        except asyncio.CancelledError:
-            del user_connections[user_id]
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
-
-
-
-
-
-@router.post("/sse/notify/{user_id}")
-async def notify(user_id: str, message: Dict[str, Any] = Body(...)):
-    print("user connected", user_connections)
-    if user_id not in user_connections:
-        raise HTTPException(status_code=404, detail="Utilisateur non connecté")
-    
-    
-    await user_connections[user_id].put(message)
-    return {"status": "success", "message": "Notification envoyée"}
+@router.delete("/dev/delete_token")
+async def delete_token(request: Request, token_id: str, user_id: str = Depends(get_session_token)):
+    session_token = dict(request.headers).get('sessiontoken')
+    async with httpx.AsyncClient() as client:
+        print("micro service url:", DEV_SERVICE_URL)
+        response = await client.delete(f"{DEV_SERVICE_URL}/delete_token/{token_id}", headers={"sessiontoken": session_token})
+        print("response:", response)
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        return response.json()

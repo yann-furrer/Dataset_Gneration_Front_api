@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 class GenerateDatasetRequest(BaseModel):
     end_format: str = Field(..., description="Format de sortie souhaité (ex: csv, json)")
@@ -29,3 +29,16 @@ class GenerateDatasetRequest(BaseModel):
 class GenerateDatasetResponse(BaseModel):
     message: str
     process_id: str
+
+
+class CheckYamlRequest(BaseModel):
+    yaml_content: Dict[str, Any] = Field(..., description="Contenu YAML converti en objet JSON")
+
+class CheckYamlErrorDetail(BaseModel):
+    info: str
+    error: List[str]
+    is_valid: bool
+
+class CheckYamlSuccessResponse(BaseModel):
+    message: str
+    is_valid: bool

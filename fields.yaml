@@ -1,0 +1,88 @@
+datasetName: messageAMF
+numberOfRecords: 111
+bone:
+ - fieldName : entrypoint
+   type: bool
+   rules:
+    range:
+      probability: 0.5
+ - fieldName : string
+   rules: 
+     allowedValues : ["ceci est un dataset demo"]
+ 
+fields:
+  - fieldName: countryName
+    fakerType: countryName
+  - fieldName: firstname
+    fakerType: name
+  - fieldName: ville
+    fakerType: city
+  - fieldName: date_de_naissance
+    type: date
+    rules:
+      range:
+        start: "1960-01-01"
+        end: "2154-01-01"
+      series: days
+      series_gap: 1
+      format: "%Y-%m-%d %H:%M:%S"
+      
+  - fieldName: type de mutuel
+    type: integer
+    rules:
+      range:
+        min: 30
+        max: 100
+    seasonnality : date_de_naissance
+    
+  - fieldName: array_corr
+    type: array
+    rules:
+      count: 1
+    fields:
+      - fieldName: test_correlation
+        type: integer
+        correlation: 0.99
+        # les correaltion ne peuvent prendre comme cible que les valeurs ayant une clés pas les tableaux
+        correlation_target: type de mutuel
+        rules:
+          range:
+            min: 0
+            max: 100 
+        
+
+  - fieldName: date_de_naissance
+    type: date
+    rules:
+      range:
+        start: "1960-01-01"
+        end: "2154-01-01"
+      series: days
+      series_gap: 1
+      format: "%Y-%m-%d %H:%M:%S"
+   
+  - fieldName: budget
+    type: integer
+    rules:
+      range:
+        min: 80
+        max: 1000
+    seasonnality : date_de_naissance
+
+  - fieldName: travail
+    fakerType: job
+  - fieldName: forme_du_visage
+    type: string
+
+    rules :
+      allowedValues: ["fine", "moyenne", "large"]
+  - fieldName: marque_favorite
+    type: string
+    rules :
+      allowedValues: [
+        "Ray-Ban", "Persol", "Gucci", "Prada", "Dior", "Chanel", "Versace", "Saint Laurent", "Cartier", "Fendi",
+        "Oakley", "Maui Jim", "Serengeti", "Randolph Engineering", "Bollé", "Julbo", "Vuarnet", "Smith Optics",
+        "Oliver Peoples", "Mykita", "Cutler and Gross", "Moscot", "Thierry Lasry", "Lindberg", "Kuboraum", "Dita", "Jacques Marie Mage",
+        "Etnia Barcelona", "Warby Parker", "Komono", "Hawkers", "Izipizi", "Le Specs", "SunGod",
+        "Adidas Eyewear", "Nike Vision", "Rudy Project", "POC", "100%" 
+        ]

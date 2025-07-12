@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from schema.dataset_shema import *
 from core.queue_config import send_message_to_celery_queue, TaskSchema
 from core.checking import  check_dev_token_validity, check_dev_token, get_dev_token_info
-
+from core.dev_utils import check_yaml_is_valid
 
 router = APIRouter()
 security = HTTPBearer()  
@@ -167,3 +167,33 @@ async def ping_generation_process(
         )
 
     return {"status": status}
+
+
+
+@router.post(
+    "/dev/check_yaml",
+    response_model=CheckYamlSuccessResponse,
+    responses={
+        400: {
+            "model": CheckYamlErrorDetail,
+            "description": "Erreur dans le contenu YAML fourni",
+        }
+    },
+    summary="Valide un contenu YAML transformé en JSON",
+    description="Cette route prend un contenu YAML (déjà transformé en JSON), le valide et renvoie soit un succès, soit une liste d'erreurs."
+)
+async def check_yaml(request_body: CheckYamlRequest, _ = Depends(check_dev_token)):
+    error_list = check_yaml_is_valid(request_body.yaml_content)
+
+    if error_list:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "info": "Error while converting to rules. Check list of errors and fix it.",
+                "error": error_list,
+                "is_valid": False
+            },
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return {"message": "yaml is valid", "is_valid": True}
