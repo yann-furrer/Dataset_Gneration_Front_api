@@ -1,8 +1,8 @@
 
-import os , sys, json, uuid
+import os , sys, json, uuid, httpx
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import  HTTPBearer
-
+from dotenv import load_dotenv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from utils.s3_handle import S3Manager
 
@@ -13,7 +13,24 @@ from core.user import insert_subscription
 from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset, insert_rules_config_info, insert_dataset_config_and_rules_config_info, select_dataset_config_and_rules_config
 #import pour la table Dataset
 from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical, update_finished_dataset, update_status_dataset
+# import faket tpye utils 
+from utils.faker_type_utils import extract_all_faker_types
+load_dotenv()
 
+
+
+MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL")
+API_KEY = os.getenv("API_KEY")  # À changer/environner en production !
+# MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL",None)
+print("MICRO_SERVICE_URL:", MICRO_SERVICE_URL)
+if MICRO_SERVICE_URL is None:
+    raise ValueError("MICRO_SERVICE_URL is not set in the environment variables.")
+
+
+#Load faker name lsit 
+with open("./utils/faker_list.json", "r") as f:
+    faker_list = json.load(f)
+    set_faker_list = set(faker_list)
 
 router = APIRouter()
 security = HTTPBearer()  
@@ -179,10 +196,38 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
     nbRows = body.get("nbRows" , 1)
     function = body.get("function" , "preprocessing_generation") # description of the function to be executed on the celery queue
     body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
-    faker_name_dict = body.get("faker_name_dict" , [])
+    # faker_name_dict = body.get("faker_name_dict" , [])
     # print("--> faker_name_dict",faker_name_dict)
 
-  
+
+    faker_client_list = []
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{MICRO_SERVICE_URL}/faker_name_list_front/{userId}", headers={"X-API-KEY": os.getenv("API_KEY")})
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        else:
+            faker_client_list = response.json()
+
+
+    # requete pour recuperer le nom des fakers disponibles pour le client
+    # pour que le set gloabal reste inchangé
+    set_faker_list_copy = set_faker_list.copy()
+    set_faker_list_copy.update(faker_client_list) # list globale des noms de fonctions fakers client + de base
+    faker_name_dict : list = extract_all_faker_types(yamlContent)
+
+    missing_value = [elem for elem in faker_name_dict if elem not in set_faker_list]
+    if missing_value != []:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while chechking faker name. A faker name is not exist add it to the faker_list.json file on a front missing_value : " + str(missing_value),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    print("success")
+
+
+
+
     inserting_dataset_info(dataset_row_id ,dataset_config_id, userId, campaignid, "waiting",  nbRows, dataset_name)
     draftResult = {"test": "test"}
     if any(value == None for value in body_value_list):
