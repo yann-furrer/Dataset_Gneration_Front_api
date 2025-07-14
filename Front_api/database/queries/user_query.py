@@ -5,6 +5,22 @@ from config import *
 
 
 
+#Retourne l'abonnement d'un user
+GET_SUBSCRIPTION = """
+SELECT "suscriptionType" FROM public."Suscription" WHERE "userId" = :userId;
+"""
+def get_user_subscription(userId : str) -> bool:
+    """
+    Insert new subscription
+    """
+    try:
+        request = session.execute(text(GET_SUBSCRIPTION), {"userId": userId})
+        result = request.fetchone()
+        return result[0]
+    except Exception as error:
+         session.rollback()
+         print("error -->",error)
+
 #Ajout d'un abonnement 
 INSERT_SUBSCRIPTION = """
 INSERT INTO public."Suscription"(
@@ -15,7 +31,19 @@ UPDATE_USER_QUOTA_USED = """
 UPDATE public."APIHandle" SET "quotaUsed" =  "quotaUsed" + :new_quota_used_to_sum, "updatedAt" = CURRENT_TIMESTAMP WHERE "userId" = :userId;
 """
 
-
+def update_quota_used(userId : str, new_quota_used_to_sum : int) -> bool:
+    """
+    Update quota used
+    """
+    try:
+        session.execute(text(UPDATE_USER_QUOTA_USED), {"new_quota_used_to_sum": new_quota_used_to_sum, "userId": userId})
+        session.commit()
+        return True
+    except Exception as error:
+         session.rollback()
+         print("error -->",error)
+         return False
+    
 
 def insert_subscription(userId : str, currentPeriodEnd : str, suscriptionType : str, nbRowsMaxSuscribed : int) -> bool:
     """
@@ -31,17 +59,25 @@ def insert_subscription(userId : str, currentPeriodEnd : str, suscriptionType : 
          return False
     
 
-def update_quota_used(userId : str, new_quota_used_to_sum : int) -> bool:
+
+
+# Cette requete est utilisée pour vérifier si un abonnement existe déjà lors de la connexion sur le front
+INSERT_SUBSCRIPTION_IF_NOT_EXIST = """
+INSERT INTO public."Suscription"(
+	 "userId", status, "currentPeriodEnd", "createdAt", "updatedAt", "suscriptionType", "nbRowsMaxSuscribed")
+	VALUES (:userId, :status, :currentPeriodEnd, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :suscriptionType, :nbRowsMaxSuscribed)
+	ON CONFLICT ("userId") DO NOTHING;
     """
-    Update quota used
+
+def insert_subscription_if_not_exist(userId : str, status : str, currentPeriodEnd : str, suscriptionType : str = "Explorer", nbRowsMaxSuscribed : int = 3000) -> bool:
+    """
+    Insert new subscription
     """
     try:
-        session.execute(text(UPDATE_USER_QUOTA_USED), {"new_quota_used_to_sum": new_quota_used_to_sum, "userId": userId})
+        session.execute(text(INSERT_SUBSCRIPTION_IF_NOT_EXIST), {"userId": userId, "status" : status, "status": "active", "currentPeriodEnd": currentPeriodEnd, "suscriptionType": suscriptionType, "nbRowsMaxSuscribed": nbRowsMaxSuscribed})
         session.commit()
         return True
     except Exception as error:
          session.rollback()
          print("error -->",error)
-         return False
-    
-    
+         return False   

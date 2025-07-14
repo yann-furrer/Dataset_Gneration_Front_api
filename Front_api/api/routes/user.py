@@ -4,9 +4,43 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import  HTTPBearer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from core.checking import check_user_limit_credit, get_session_token
-from core.user import insert_subscription
+from core.user import insert_subscription, insert_subscription_for_connexion_callback, get_subscription, update_quota
 router = APIRouter()
 security = HTTPBearer()  
+
+
+
+@router.get("/user/update_quota")
+async def update_quota_consumption(userId : str, nbRows: str):
+    """
+    Add subscription to user
+    """
+    result_request : bool = update_quota(userId, int(nbRows))
+    print("result_request -->", result_request)
+    return {"message": "Quota updated!"}
+
+
+
+@router.get("/user/get_subscription")
+async def get_subscription_type(userId : str):
+    """
+    Add subscription to user, en cas d'erreur renvoie l'abonnement explorer (le gratuit et le plus limité)
+    """
+    sub = get_subscription(userId)
+    print("sub -->", sub)
+    print(sub)
+    return {"subscriptionType": sub}
+
+# Utilisable que par stripe pour la création de la souscription
+@router.post("/user/launch_subscription")
+async def launch_subscription(request: Request, userId: str):
+    """
+    Add subscription to user
+    """
+    a = insert_subscription_for_connexion_callback(userId, "en cours")
+    # Check if the user is already subscribed
+    return {"message": "Subscription added!"}
+   
 
 # Utilisable que par stripe pour la création de la souscription
 
