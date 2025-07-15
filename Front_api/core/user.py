@@ -2,7 +2,7 @@ import os , sys , json
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
-from database.queries.user_query import insert_subscription , insert_subscription_if_not_exist, get_user_subscription, update_quota_used
+from database.queries.user_query import insert_subscription , insert_subscription_if_not_exist, get_user_subscription, update_quota_used, select_nbrows_by_dataset, select_statistics_by_user
 
 with open("subSysteminfo.json") as f:
     subSystemInfo = json.load(f)
@@ -91,3 +91,42 @@ def update_quota(userId : str, nb_rows : int) -> bool:
         )
     else:    
         return True
+
+
+
+#Statistique pour l'abonnment
+
+
+def get_rows_generated(userId : str) -> bool:
+    """
+    Insert new subscription
+    """
+    # type (nbrows : int, day_number : int)
+    result_request : bool = select_nbrows_by_dataset(userId)
+    if result_request == False:
+        HTTPException(
+            status_code=400,
+            detail="Error while getting dataset historical",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    else:
+        return result_request
+    
+
+def get_statistics(userId : str) -> bool:
+    """
+    Insert new subscription
+    """
+    # type (nbrows : int, day_number : int)
+    result_request : tuple   = select_statistics_by_user(userId)
+    if result_request == False:
+        HTTPException(
+            status_code=400,
+            detail="Error while getting dataset historical",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if result_request == None:
+        return (0, 0)
+    else:
+        return result_request

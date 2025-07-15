@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import  HTTPBearer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from core.checking import check_user_limit_credit, get_session_token
-from core.user import insert_subscription, insert_subscription_for_connexion_callback, get_subscription, update_quota
+from core.user import insert_subscription, insert_subscription_for_connexion_callback, get_subscription, update_quota, get_rows_generated, get_statistics
 router = APIRouter()
 security = HTTPBearer()  
 
@@ -82,3 +82,37 @@ async def generete_request(request: Request , userId : str = Depends(check_user_
       
       
         return {"message": "Request generated!"}
+
+
+# Statistique pour l'abonnment
+@router.get("/statistics/generated_row_monthly")
+async def get_rows_generated_monthly(userId : str = Depends(get_session_token)):
+        """
+        Add subscription to user
+        """
+        data = get_rows_generated(userId)
+        if data == False:
+            raise HTTPException(
+                status_code=400,
+                detail="Error while getting dataset historical",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if data == None:
+             return {"nbrows": list(range(1, 31)), "day_number":  [0] * 30}
+        
+
+        return {"nbrows": data[0], "day_number": data[1]}
+
+@router.get("/statistics/get_main_statistics")
+async def get_main_statistics(userId : str = Depends(get_session_token)):
+        """
+        Add subscription to user
+        """
+        data = get_statistics(userId)
+        if data == False:
+            raise HTTPException(
+                status_code=400,
+                detail="Error while getting dataset historical",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return{"nbrows": data[0], "number_of_dataset": data[1]}

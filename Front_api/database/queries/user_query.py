@@ -81,3 +81,52 @@ def insert_subscription_if_not_exist(userId : str, status : str, currentPeriodEn
          session.rollback()
          print("error -->",error)
          return False   
+    
+
+#Statistique pour l'abonnment
+
+SELECT_NBROWS_BY_DATASET = """
+
+SELECT 
+SUM("nbRows"),
+EXTRACT(day FROM "createdAt") AS day_number
+FROM public."Dataset"
+WHERE "ownerId" = 'cmcusdmjn0000nw0fhp833u2l'
+  AND "status" != 'error'
+  AND "createdAt" >= date_trunc('month', current_date)
+  AND "createdAt" < date_trunc('month', current_date + interval '1 month')
+GROUP BY day_number;
+"""
+
+def select_nbrows_by_dataset(userId : str) -> tuple:
+    try:
+        result = session.execute(text(SELECT_NBROWS_BY_DATASET), {"ownerId": userId})
+        row = result.fetchall()
+       
+        nb_rows = [elem[0] for elem in row]
+        day_number = [elem[1] for elem in row]
+
+        return (nb_rows, day_number)
+    except Exception as error:
+        session.rollback()
+        print("error -->",error)
+        return False
+    
+
+SELECT_STAT_BY_USER = """
+SELECT SUM("nbRows") AS "sumrows", COUNT("id") AS "sumdataset"
+FROM public."Dataset" WHERE "ownerId" = :userId
+GROUP BY date_trunc('month', "createdAt");
+"""
+
+
+
+def select_statistics_by_user(userId : str) -> bool:
+    try:
+        result = session.execute(text(SELECT_STAT_BY_USER), {"userId": userId})
+        row = result.fetchone()
+        print("row -->", row)
+        return row
+    except Exception as error:
+        session.rollback()
+        print("error -->",error)
