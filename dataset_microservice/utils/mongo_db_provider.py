@@ -337,6 +337,26 @@ class MongoDBManager:
          """
          return self.update_one(filter_query, update_query)
     
+# ======================== FONCTION COMPTE ========================
+    def count_documents(filter_dict: Dict[str, Any] = None, collection_name: str = None) -> int:
+        """
+        Compte les documents selon un filtre
+        
+        Args:
+            filter_dict: Dictionnaire de filtrage
+            collection_name: Nom de la collection
+        
+        Returns:
+            Nombre de documents
+        """
+        try:
+            collection = self.get_collection(collection_name)
+            filter_dict = filter_dict or {}
+            return collection.count_documents(filter_dict)
+        except PyMongoError as e:
+            print(f"❌ Erreur lors du comptage: {e}")
+            return 0
+
     # ======================== FONCTIONS UTILITAIRES ========================
     
     def drop_collection(self, collection_name: str = None) -> bool:
@@ -363,6 +383,9 @@ class MongoDBManager:
         if self.client:
             self.client.close()
             print("✅ Connexion fermée")
+
+
+
 
 # ======================== EXEMPLE D'UTILISATION ========================
 

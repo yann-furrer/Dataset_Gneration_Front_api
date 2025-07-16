@@ -73,7 +73,7 @@ def update_quota_used(token_id : str, new_quota_used_to_sum : int) -> bool:
     Update quota used
     """
     try:
-        session.execute(text(UPDATE_QUOTA_DEV_TOKEN), {"new_quota_used_to_sum": new_quota_used_to_sum, "token_id": token_id})
+        session.execute(text(UPDATE_QUOTA_DEV_TOKEN), {"new_quota_used_to_sum": int(new_quota_used_to_sum), "token_id": token_id})
         session.commit()
         return True
     except Exception as error:

@@ -1,13 +1,23 @@
 
-import os , sys, json
-from fastapi import APIRouter, HTTPException, Request, Depends
+import os , sys, json, httpx
+from fastapi import APIRouter, HTTPException, Request, Depends, JSONResponse
 from fastapi.security import  HTTPBearer
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from core.checking import check_user_limit_credit, get_session_token
 from core.user import insert_subscription, insert_subscription_for_connexion_callback, get_subscription, update_quota, get_rows_generated, get_statistics
+
+
+
+MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL")
+API_KEY = os.getenv("API_KEY")  # À changer/environner en production !
+# MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL",None)
+print("MICRO_SERVICE_URL:", MICRO_SERVICE_URL)
+if MICRO_SERVICE_URL is None:
+    raise ValueError("MICRO_SERVICE_URL is not set in the environment variables.")
+
+
 router = APIRouter()
 security = HTTPBearer()  
-
 
 
 @router.get("/user/update_quota")
@@ -116,3 +126,22 @@ async def get_main_statistics(userId : str = Depends(get_session_token)):
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return{"nbrows": data[0], "number_of_dataset": data[1]}
+
+
+
+
+# /get_sum_of_faker_type
+
+
+@router.get("/microservice/count_faker_type/")
+async def delete_faker_type(userId: str = Depends(get_session_token)):
+    
+    
+    
+    async with httpx.AsyncClient() as client:
+        print("micro service url:", MICRO_SERVICE_URL)
+        response = await client.get(f"{MICRO_SERVICE_URL}/get_sum_of_faker_type?client_id={userId}",
+            headers={"X-API-KEY": os.getenv("API_KEY")})
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        return JSONResponse( response.json())

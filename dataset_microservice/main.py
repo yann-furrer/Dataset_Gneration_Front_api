@@ -167,7 +167,14 @@ async def delete_faker_type( client_id: str, faker_type_id: str):
             detail="Error while deleting faker content not exist or already deleted",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
+@app.get("/get_sum_of_faker_type")
+async def get_sum_of_faker_type(client_id: str):
+    """
+    Retourne la liste des valeurs de données Faker disponibles pour un type donné.
+    """
+    faker_types = faker_handler.count_documents(filte_dict={"client_id": client_id })
+    print("faker_types:", faker_types)
+    return JSONResponse( faker_types)
 
 
 

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBearer
-from database.queries.dev_api import insert_api_token, delete_api_token, update_quota_used, select_dev_token_info , update_quota_used
+from database.queries.dev_api import insert_api_token, delete_api_token, select_dev_token_info , update_quota_used
 from core.dev_utils import *
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
@@ -51,12 +51,13 @@ def list_dev_tokens(userId : str) -> bool:
 
 
 # Insertion d'un token dans la table APIHandle
-def insert_dev_token(userId : str, limit : int, expire : datetime = datetime.now() + timedelta(days=365)) -> bool:
+def insert_dev_token(userId : str, limit : int) -> bool:
     """
     Insert new API token
     """
     token = generate_token()
-    result_request = insert_api_token(userId, token, "*"*17+token[17:], limit)
+    expire : datetime = datetime.now() + timedelta(days=365)
+    result_request = insert_api_token(userId, token, "*"*17+token[17:])
     if result_request == False:
         HTTPException(
             status_code=400,
@@ -132,3 +133,4 @@ def check_config_validity(yaml_content : dict, rules_content : list = []) -> dic
     numberOfRecords  = yaml_content.get("numberOfRecords" , "empty")
     fields = yaml_content.get("fields" , "empty")
     bones = yaml_content.get("bones" , "empty")
+    return {"not valid": "ROUTE A FAIRE "}
