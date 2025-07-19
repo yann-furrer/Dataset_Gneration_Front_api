@@ -64,6 +64,16 @@ class S3Manager:
         except Exception as e:
             print(f"❌ Erreur lors de la suppression du fichier: {e}")
        
+    def delete_s3_file(self, client_id :str, file_name: str) ->bool:
+        """Supprime le fichier S3 d'un client."""
+        object_key = f"{client_id}/{file_name}"
+        try:
+            self.s3_client.delete_object(Bucket=self.bucket_name, Key=object_key)
+            print(f"✅ Fichier supprimé: {object_key}")
+            return True
+        except Exception as e:
+            print(f"❌ Erreur lors de la suppression du fichier: {e}")
+            return False
 # # Exemple d'utilisation
 # if __name__ == "__main__":
 #     s3_manager = S3Manager()

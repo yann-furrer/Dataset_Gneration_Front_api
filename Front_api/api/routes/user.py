@@ -102,6 +102,7 @@ async def get_rows_generated_monthly(userId : str = Depends(get_session_token)):
         Add subscription to user
         """
         data = get_rows_generated(userId)
+        print("data -->", data)
         if data == False:
             raise HTTPException(
                 status_code=400,

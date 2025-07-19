@@ -91,7 +91,7 @@ SELECT
 SUM("nbRows"),
 EXTRACT(day FROM "createdAt") AS day_number
 FROM public."Dataset"
-WHERE "ownerId" = 'cmcusdmjn0000nw0fhp833u2l'
+WHERE "ownerId" = :ownerId
   AND "status" != 'error'
   AND "createdAt" >= date_trunc('month', current_date)
   AND "createdAt" < date_trunc('month', current_date + interval '1 month')

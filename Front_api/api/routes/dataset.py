@@ -12,7 +12,7 @@ from core.user import insert_subscription
 #import pour la table dataset config
 from core.dataset import insert_dataset_config_info, get_dataset_config_info, get_dataset_config_historical_offset, insert_rules_config_info, insert_dataset_config_and_rules_config_info, select_dataset_config_and_rules_config
 #import pour la table Dataset
-from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical, update_finished_dataset, update_status_dataset
+from core.dataset import inserting_dataset_info, select_all_s3_url_from_dataset, select_dataset_for_historical, update_finished_dataset, update_status_dataset, delete_dataset_historical
 # import faket tpye utils 
 from utils.faker_type_utils import extract_all_faker_types
 load_dotenv()
@@ -97,7 +97,35 @@ async def get_dataset_historical(userId : str = Depends(get_session_token), page
             detail="Error while getting dataset historical",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
+@router.delete("/dataset/delete_dataset_historical")
+async def delete_dataset_historical_route(config_system_name: str,datasetId: str, userId : str = Depends(get_session_token)):
+    """
+    Delete dataset form his s3 bucket
+    """
+    delete_result = s3_manager.delete_s3_file(userId, config_system_name)
+    print("delete_result -->", delete_result)
+    if delete_result == True:
+        print("delete_result 2 -->", delete_result)
+        print("datasetId -->", datasetId)
+        print("userId -->", userId)
+        delete_db_repsonse = delete_dataset_historical(datasetId, userId)
+        
+        if delete_db_repsonse == True:
+            return {"message": "Dataset deleted!"}
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Error while deleting dataset",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while deleting dataset",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
 
 @router.get("/dataset/get_dataset_config_historical")
 # Le -2 permet de créer une erreur si l'utilisateur n'a pas fournit de page number
@@ -214,7 +242,7 @@ async def generate_dataset(request : Request, userId : str = Depends(get_session
     set_faker_list_copy = set_faker_list.copy()
     set_faker_list_copy.update(faker_client_list) # list globale des noms de fonctions fakers client + de base
     faker_name_dict : list = extract_all_faker_types(yamlContent)
-
+    
     missing_value = [elem for elem in faker_name_dict if elem not in set_faker_list]
     if missing_value != []:
         raise HTTPException(

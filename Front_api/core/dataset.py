@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer
 #datasetConfig and rulesConfig
 from database.queries.dataset import insert_dataset_config, select_dataset_config, update_finished_dataset_info, select_dataset_historical_config_offset, insert_rules_config, select_yaml_and_rules_content_by_dataset_config_id
 #dataset
-from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset, update_dataset_status_info
+from database.queries.dataset import update_status_dataset_info, update_finished_dataset_info, insert_dataset_info, select_all_s3_url_from_dataset, select_dataset_historical_offset, update_dataset_status_info, delete_dataset_by_dataset_id
 
 from utils.s3_handle import S3Manager
 
@@ -205,3 +205,18 @@ def get_dataset_config_historical_offset(userId: str, offset: int) -> dict:
             detail=f"Error while getting dataset config maybe offset is too high {offset}",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def delete_dataset_historical(datasetId: str, userId: str) -> bool:
+    """
+    Delete dataset form his s3 bucket
+    """
+    result_request = delete_dataset_by_dataset_id(datasetId, userId)
+    if result_request == True:
+        return True
+    else:
+        HTTPException(
+            status_code=400,
+            detail="Error while deleting dataset",
+            headers={"WWW-Authenticate": "Bearer"},
+        )   

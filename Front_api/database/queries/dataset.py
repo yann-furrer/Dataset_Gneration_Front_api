@@ -293,3 +293,21 @@ def select_yaml_and_rules_content_by_dataset_config_id(datasetId: str, userId: s
         session.rollback()
         print(f"Error while selecting yaml content by dataset config id {datasetId}", e)
         return False
+    
+
+
+
+DELETE_DATASET_BY_DATASET_ID = """
+DELETE FROM public."Dataset" WHERE "id" = :id AND "ownerId" = :ownerId;
+"""
+
+def delete_dataset_by_dataset_id(datasetId: str, userId: str) -> bool:
+    try:
+        session.execute(text(DELETE_DATASET_BY_DATASET_ID), {"id": datasetId, "ownerId": userId})
+        session.commit()
+        print("passe")
+        return True
+    except Exception as e:
+        session.rollback()
+        print("Error while deleting dataset by dataset id", e)
+        return False    
