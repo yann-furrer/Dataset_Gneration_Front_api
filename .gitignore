@@ -17,3 +17,5 @@ dataset_microservice/.env
 .vscode/settings.json
 dataset_dev_microservice/.env
 dataset_dev_microservice/database/.env
+dataset_dev_microservice/schema/__pycache__/dataset_shema.cpython-312.pyc
+dataset_dev_microservice/schema/__pycache__/dataset_shema.cpython-312.pyc

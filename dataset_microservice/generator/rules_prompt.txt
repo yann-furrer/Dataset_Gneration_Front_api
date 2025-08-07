@@ -1,0 +1,49 @@
+À partir des informations suivantes, génère un tableau de modules de règles (un objet par règle à appliquer), selon la structure spécifiée ci-dessous.
+Sortie strictement en JSON, sans texte, sans commentaire, uniquement le tableau JSON.
+
+Tu vas recevoir la description métier sous forme d’un texte.
+
+Liste des variables et leur type :
+
+[variables]
+
+Liste des opérateurs :
+[“less_than”, “less_than_or_equal_to”, “greater_than”, “greater_than_or_equal_to”, “equal_to”, “not_equal”, “is_true”, “is_false”, “contains”, “not_contains”]
+
+Structure de chaque module généré :
+
+{
+  "conditions": {
+    "all": [
+      {
+        "name": "NOM_DU_CHAMP",
+        "operator": "OPÉRATEUR",
+        "value": VALEUR
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "setNull" ou "nothing",
+      "params": {
+        "field_name": "all" ou [liste de champs],
+        "value": valeur à insérer,
+        "random_anomalie_number": entier (1 par défaut si absent),
+        "avoid_field": champ ou liste de champs à exclure
+      }
+      // Si l’action est "nothing", ne mets pas le champ "params"
+    }
+  ],
+  "occurrences": entier (20 par défaut si absent),
+  "hazardous": true // Facultatif. À ajouter uniquement si la règle semble douteuse ou imprécise (ex : valeurs faker trop génériques, règle incertaine, etc.)
+}
+
+Contraintes :
+	•	Les seules actions possibles sont “setNull” et “nothing”.
+	•	Pour “setNull”, tous les params sont obligatoires (ou valeur par défaut si non précisé).
+	•	Les opérateurs possibles : greater_than, less_than, equal_to, not_equal, is_true, is_false, contains.
+	•	Si le type du champ ne permet pas “setNull”, utiliser l’action “nothing”.
+	•	Si tu doutes de la qualité de la règle à cause d’un champ faker à valeurs multiples ou d’un mapping imprécis, ajoute "hazardous": true dans l’objet.
+	•	La sortie doit être exclusivement un tableau JSON, aucune phrase ou commentaire autour.
+
+⸻
