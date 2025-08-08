@@ -32,11 +32,10 @@ from utils.s3_handle import S3Manager
 # requete sur la table datasetconfig
 
 
-def get_type_and_name_from_yaml_content(yamlContent: dict, type_dict: dict = None, name_dict: dict = None) -> tuple:
+def get_type_and_name_from_yaml_content(yamlContent: dict, type_dict: dict = None) -> tuple:
     if type_dict is None:
         type_dict = {}
-    if name_dict is None:
-        name_dict = {}
+   
         
     for elem in yamlContent:
         if elem.get("type") is not None:
@@ -45,13 +44,11 @@ def get_type_and_name_from_yaml_content(yamlContent: dict, type_dict: dict = Non
         elif elem.get("fakerType") is not None:
             type_dict[elem.get("fieldName")] = elem.get("fakerType")   # ← j’ai corrigé ici aussi
         
-        if elem.get("fieldName") is not None:
-            name_dict[elem.get("fieldName")] = elem.get("fieldName")
         
         if elem.get("type", "null") in ["object", "array"]:
-            get_type_and_name_from_yaml_content(elem["fields"], type_dict, name_dict)
+            get_type_and_name_from_yaml_content(elem["fields"], type_dict)
 
-    return type_dict, name_dict
+    return type_dict
       
  
 

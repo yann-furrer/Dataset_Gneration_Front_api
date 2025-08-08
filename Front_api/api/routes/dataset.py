@@ -434,7 +434,7 @@ async def get_config_info(datasetId: str, userId: str = Depends(get_session_toke
     if result_request is not None:
         return result_request
 
-
+# recup le contenue du yaml et ressort les variables 
 @router.get("/rules/get_yaml_content_by_dataset_config_id")
 async def get_yaml_content_by_dataset_config_id( datasetId: str, userId: str = Depends(get_session_token)):
     print("datasetId -->", datasetId)
