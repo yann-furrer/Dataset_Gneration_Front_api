@@ -35,15 +35,16 @@ from utils.s3_handle import S3Manager
 def get_type_and_name_from_yaml_content(yamlContent: dict, type_dict: dict = None) -> tuple:
     if type_dict is None:
         type_dict = {}
-   
+
         
     for elem in yamlContent:
         if elem.get("type") is not None:
-           
+          
             type_dict[elem.get('fieldName')] = elem.get("type")
         elif elem.get("fakerType") is not None:
             type_dict[elem.get("fieldName")] = elem.get("fakerType")   # ← j’ai corrigé ici aussi
         
+
         
         if elem.get("type", "null") in ["object", "array"]:
             get_type_and_name_from_yaml_content(elem["fields"], type_dict)
@@ -70,11 +71,10 @@ def select_yaml_content_dataset_config_name(datasetId: str, userId: str) -> dict
     if result_request is not None:
         data_dict = result_request[0].get("fields", {})
         
-        type_dict, name_dict = get_type_and_name_from_yaml_content(data_dict, None, None)
-        print("type_dict -->", type_dict)
-        print("name_dict -->", name_dict)
+        type_dict  = get_type_and_name_from_yaml_content(data_dict, None)
+      
         # print("data_dict -->", get_type_and_namr_from_yaml_content(data_dict, {}, {}))
-        return type_dict, name_dict
+        return type_dict
     
     else:
         HTTPException(
