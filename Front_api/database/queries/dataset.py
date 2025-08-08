@@ -1,8 +1,9 @@
 
-import os , sys, re
+import os
+import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from config import *
+from config import text, session
 
 
 # Save dataset config mixe first saveing and saving dataset
@@ -64,7 +65,7 @@ INSERT INTO public."RulesConfig"(
 
 def insert_rules_config(rulesId: str, userId: str,  rulesName: str, rulesContent: str, datasetConfigId: int, campaignId: str = None) -> bool:  
     try:
-        if campaignId == None:
+        if campaignId is None:
             campaignId = ""
             session.execute(text(INSERT_ON_CONFLICT_RULES_CONFIG), {"rulesId": rulesId, "userId": userId, "rulesName": rulesName, "rulesContent": rulesContent, "datasetConfigId": datasetConfigId})
             session.commit()
@@ -97,6 +98,7 @@ def select_dataset_config(datasetId: str, userId: str) -> bool:
         return False
     
 
+
 INSERT_DATASET_INFO = """
 INSERT INTO public."Dataset"(
 	"id", "nbRows", "datasetConfigId", "ownerId", "status", "datasetName")
@@ -111,7 +113,7 @@ INSERT INTO public."Dataset"(
 
 def insert_dataset_info(dataset_row_id: str, datasetConfigId: int, ownerId: str, campaingId: str = None, status: str = "waiting", nbRows: int = 0, datasetName: str = None) -> bool:
     try:
-        if campaingId == None:
+        if campaingId is None:
             session.execute(text(INSERT_DATASET_INFO), {"id": dataset_row_id, "datasetConfigId": datasetConfigId, "ownerId": ownerId, "campaignId": campaingId, "status": status, "nbRows": nbRows, "datasetName": datasetName})
             session.commit()
         else:
@@ -197,7 +199,7 @@ def select_all_s3_url_from_dataset(userId: str) -> dict:
         result = request.fetchall()
         return result
     except Exception as e:
-        print(f"Error while selecting all s3Url from dataset with this user", e)
+        print("Error while selecting all s3Url from dataset with this user", e)
         session.rollback()
         return False
 
@@ -272,10 +274,32 @@ def select_dataset_historical_config_offset(userId: str, offset: int) -> dict:
         print(f"Error while selecting dataset historical {userId}", e)
         return False
     
+SELECT_DATASET_CONFIG_NAME_BY_USER_ID = """
+SELECT "yamlName", "datasetId", "id" FROM public."DatasetConfig" WHERE "userId" = :userId;
+"""
+def select_dataset_config_name_by_user_id(userId: str) -> dict:
+    try:
+        request = session.execute(text(SELECT_DATASET_CONFIG_NAME_BY_USER_ID), {"userId": userId})
+        result = request.fetchall()
+        return result
+    except Exception as e:        
+        print(f"Error while selecting dataset config name by user id {userId}", e)
+
+
 
 SELECT_YAML_CONTENT_BY_DATASET_CONFIG_ID = """
 SELECT "yamlContent" FROM public."DatasetConfig" WHERE "datasetId" = :datasetId AND "userId" = :userId;
 """
+
+def select_yaml_content_by_dataset_config_id(datasetId: str, userId: str) -> dict:
+    try:
+        request_yaml = session.execute(text(SELECT_YAML_CONTENT_BY_DATASET_CONFIG_ID), {"datasetId": datasetId, "userId": userId})
+        result_yaml = request_yaml.fetchone()
+        return result_yaml
+    except Exception as e:
+        session.rollback()
+        print(f"Error while selecting yaml content by dataset config id {datasetId}", e)
+        return False
 
 SELECT_RULES_CONTENT_BY_DATASET_CONFIG_ID = """
 SELECT "rulesContent" FROM public."RulesConfig" WHERE "datasetConfigId" = :datasetConfigId AND "userId" = :userId;

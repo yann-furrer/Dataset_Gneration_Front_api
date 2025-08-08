@@ -59,29 +59,13 @@ async def generate_dataset_config(request: Request, userId: str = Depends(get_se
             raise HTTPException(status_code=response.status_code, detail=response.text)
         return JSONResponse(response.json())
 
-#genère les règles de validation pour le dataset sample
-@router.post("/microservice/generate_rules")
-async def generate_rules(request: Request, userId: str = Depends(get_session_token)):
-    body = await request.json()
-    user_prompt = body.get("user_prompt", None)
-    dataset_id = body.get("dataset_id", None)
 
-    if not user_prompt:
-        raise HTTPException(
-            status_code=400,
-            detail="user_prompt is required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
-    async with httpx.AsyncClient() as client:
-        print("micro service url:", MICRO_SERVICE_URL)
-        response = await client.post(f"{MICRO_SERVICE_URL}/generate_rules", 
-            headers={"X-API-KEY": os.getenv("API_KEY")},
-            json={"client_id": userId, "user_prompt": user_prompt, "dataset_id": dataset_id})
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
-        
-    return JSONResponse(response.json())
+
+
+
+
+
 
 
 

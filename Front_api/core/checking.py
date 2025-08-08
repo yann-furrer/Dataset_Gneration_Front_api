@@ -59,7 +59,7 @@ async def get_session_token(request: Request) -> str:
     session_token = dict(request.headers).get('sessiontoken')
     userId = check_session_token(session_token)
     print("userId -->", userId)
-    if userId == False:
+    if not userId:
         raise HTTPException(
             status_code=401,
             detail="Session token not found or invalid",
