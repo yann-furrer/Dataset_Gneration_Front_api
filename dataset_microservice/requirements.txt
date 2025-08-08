@@ -7,3 +7,4 @@ asyncio==3.4.3
 backoff==2.2.1
 python-dateutil==2.9.0.post0
 pymongo==4.11.1
+sqlalchemy==2.0.40
