@@ -25,7 +25,7 @@ class TaskSchema(TypedDict):
     faker_name_list : Optional[list]
     rules: Optional[dict]
     request_type: Optional[str]
-    dataset__config_parent_id : Optional[str]
+    dataset_config_parent_id : Optional[str]
     dataset_fields_list =   Optional[list]
 
 

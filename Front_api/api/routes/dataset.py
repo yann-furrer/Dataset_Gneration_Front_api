@@ -286,7 +286,7 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
         "campaignid", None
     )  # pour l'instant on ne prend pas en compte le campaignid
     nbRows = body.get("nbRows", 1)
-    dataset__config_parent_id = body.get("dataset_parent_id", None)
+    dataset_config_parent_id = body.get("dataset_parent_id", None)
     dataset_fields_list = body.get("dataset_fields_list", None)
     function = body.get(
         "function", "preprocessing_generation"
@@ -356,7 +356,7 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
             dataset_config=dataset_config_id,
             faker_name_dict=faker_name_dict,
             request_type="api",
-            dataset__config_parent_id=dataset__config_parent_id,
+            dataset_config_parent_id=dataset_config_parent_id,
             dataset_fields_list=dataset_fields_list
         )
     )
