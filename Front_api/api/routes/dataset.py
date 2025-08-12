@@ -286,6 +286,8 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
         "campaignid", None
     )  # pour l'instant on ne prend pas en compte le campaignid
     nbRows = body.get("nbRows", 1)
+    dataset__config_parent_id = body.get("dataset_parent_id", None)
+    dataset_fields_list = body.get("dataset_fields_list", None)
     function = body.get(
         "function", "preprocessing_generation"
     )  # description of the function to be executed on the celery queue
@@ -333,7 +335,7 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
         dataset_name,
     )
     draftResult = {"test": "test"}
-    if any(value == None for value in body_value_list):
+    if any(value is None for value in body_value_list):
         raise HTTPException(
             status_code=400,
             detail="Missing required fields in the request body or None value",
@@ -354,6 +356,8 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
             dataset_config=dataset_config_id,
             faker_name_dict=faker_name_dict,
             request_type="api",
+            dataset__config_parent_id=dataset__config_parent_id,
+            dataset_fields_list=dataset_fields_list
         )
     )
     return {"message": "Dataset {dataset_name} ajouter à queue !"}
