@@ -502,8 +502,8 @@ async def generate_rules(request: Request, userId: str = Depends(get_session_tok
 
 # A sécuriser
 @router.get("/get_dataset_system_name")
-async def get_dataset_system_name_of_dataset_config(datasetId: str, userId: str):
-    dataset_system_name: str =  select_dataset_name_system_with_dataset_id_core(datasetId, userId)
+async def get_dataset_system_name_of_dataset_config(datasetConfigId: str, userId: str):
+    dataset_system_name: str =  select_dataset_name_system_with_dataset_id_core(datasetConfigId, userId)
     if not dataset_system_name or not dataset_system_name:
         raise HTTPException(
             status_code=400,
