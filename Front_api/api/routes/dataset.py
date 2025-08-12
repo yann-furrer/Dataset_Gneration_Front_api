@@ -25,12 +25,13 @@ from core.dataset import (
 
 # import pour la table Dataset
 from core.dataset import (
-    inserting_dataset_info,
+    inserting_dataset_info_core,
     select_dataset_for_historical,
     update_finished_dataset,
     update_status_dataset,
     delete_dataset_historical,
-    get_dataset_config_name_by_user_id
+    get_dataset_config_name_by_user_id,
+    select_dataset_name_system_with_dataset_id_core
 )
 
 # import faket tpye utils
@@ -322,7 +323,7 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
 
     print("success")
 
-    inserting_dataset_info(
+    inserting_dataset_info_core(
         dataset_row_id,
         dataset_config_id,
         userId,
@@ -476,3 +477,37 @@ async def generate_rules(request: Request, userId: str = Depends(get_session_tok
             raise HTTPException(status_code=response.status_code, detail=response.text)
 
     return JSONResponse(response.json())
+
+
+
+
+
+
+
+
+
+
+
+
+# ==============================================================
+# 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `datasetconfig`
+# --------------------------------------------------------------
+# 🔍 Contexte :
+#   - Ces routes manipulent uniquement la configuration des datasets.
+#   - Aucune interaction avec `rulesoconfig` ici.
+#   - Dans d'autres fichiers, certaines routes peuvent être hybrides
+#     et toucher à la fois `datasetconfig` et `rulesoconfig`.
+# ==============================================================
+
+
+# A sécuriser
+@router.get("/get_dataset_system_name")
+async def get_dataset_system_name_of_dataset_config(datasetId: str, userId: str):
+    dataset_system_name: str =  select_dataset_name_system_with_dataset_id_core(datasetId, userId)
+    if not dataset_system_name or not dataset_system_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while getting dataset config",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return JSONResponse({"dataset_system_name": dataset_system_name})

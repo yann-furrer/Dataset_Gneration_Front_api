@@ -8,50 +8,59 @@ from fastapi import HTTPException
 # datasetConfig and rulesConfig
 from database.queries.dataset import (
     insert_dataset_config,
+    insert_rules_config,
     select_dataset_config,
     select_dataset_historical_config_offset,
-    insert_rules_config,
     select_yaml_and_rules_content_by_dataset_config_id,
     select_dataset_config_name_by_user_id,
-    select_yaml_content_by_dataset_config_id
+    select_yaml_content_by_dataset_config_id,
 )
 
 # dataset
 from database.queries.dataset import (
-    update_finished_dataset_info,
     insert_dataset_info,
+    select_dataset_name_system_with_dataset_id,
     select_all_s3_url_from_dataset,
     select_dataset_historical_offset,
-    update_dataset_status_info,
+    update_finished_dataset_info,
+    update_status_dataset_info,
     delete_dataset_by_dataset_id,
 )
 
 from utils.s3_handle import S3Manager
 
 
-# requete sur la table datasetconfig
+# ==============================================================
+# 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `DATASETCONFIG`
+# --------------------------------------------------------------
+# 🔍 Contexte :
+#   - Ces routes manipulent uniquement la configuration des datasets.
+#   - Aucune interaction avec `RULESCONFIG` n'est possible.
+#   - Dans d'autres fichiers, certaines routes peuvent être hybrides
+#     et toucher à la fois `DATASETCONFIG` et `RULESCONFIG`.
+# ==============================================================
 
 
-def get_type_and_name_from_yaml_content(yamlContent: dict, type_dict: dict = None) -> tuple:
+def get_type_and_name_from_yaml_content(
+    yamlContent: dict, type_dict: dict = None
+) -> tuple:
     if type_dict is None:
         type_dict = {}
 
-        
     for elem in yamlContent:
         if elem.get("type") is not None:
-          
-            type_dict[elem.get('fieldName')] = elem.get("type")
-        elif elem.get("fakerType") is not None:
-            type_dict[elem.get("fieldName")] = elem.get("fakerType")   # ← j’ai corrigé ici aussi
-        
 
-        
+            type_dict[elem.get("fieldName")] = elem.get("type")
+        elif elem.get("fakerType") is not None:
+            type_dict[elem.get("fieldName")] = elem.get(
+                "fakerType"
+            )  # ← j’ai corrigé ici aussi
+
         if elem.get("type", "null") in ["object", "array"]:
             get_type_and_name_from_yaml_content(elem["fields"], type_dict)
 
     return type_dict
-      
- 
+
 
 def select_yaml_content_dataset_config_name(datasetId: str, userId: str) -> dict:
     if datasetId is None:
@@ -70,18 +79,19 @@ def select_yaml_content_dataset_config_name(datasetId: str, userId: str) -> dict
     # print("result_request -->", result_request)
     if result_request is not None:
         data_dict = result_request[0].get("fields", {})
-        
-        type_dict  = get_type_and_name_from_yaml_content(data_dict, None)
-      
+
+        type_dict = get_type_and_name_from_yaml_content(data_dict, None)
+
         # print("data_dict -->", get_type_and_namr_from_yaml_content(data_dict, {}, {}))
         return type_dict
-    
+
     else:
         HTTPException(
             status_code=400,
             detail="Error while getting dataset config",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 def insert_dataset_config_info(
     datasetId: str,
@@ -167,7 +177,7 @@ def insert_dataset_config_and_rules_config_info(
             campaignId,
         )
 
-    if result_request_dataset_config == True and result_rules_config == True:
+    if result_request_dataset_config and result_rules_config:
         return True
     else:
         HTTPException(
@@ -246,10 +256,20 @@ def select_dataset_config_and_rules_config(datasetId: str, userId: str) -> dict:
     return result_request
 
 
-# requete sur la table dataset
+"""
+Séparation des requetes, pour la gestion des datasets
+Ici se trouve les requetes sur la table dataset mais il est possible qu'une fonction utilise une autre table
+
+"""
+
+######### requete sur la table DATASET #########
+
+"""
+INSERT QUERY
+"""
 
 
-def inserting_dataset_info(
+def inserting_dataset_info_core(
     dataset_row_id,
     datasetConfigId: int,
     ownerId: str,
@@ -281,6 +301,23 @@ def inserting_dataset_info(
         )
 
 
+"""
+SELECT QUERY
+"""
+
+
+def select_dataset_name_system_with_dataset_id_core(datasetId: str, userId: str) -> str:
+    response_request = select_dataset_name_system_with_dataset_id(datasetId, userId)
+    if not response_request:
+        raise HTTPException(
+            status_code=400,
+            detail="Error while selecting dataset name system with dataset id",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    else:
+        return response_request[0]
+
+
 def update_finished_dataset(
     dataset_name: str, datasetId: str, generationError: str, status: str
 ) -> bool:
@@ -308,7 +345,7 @@ def update_status_dataset(datasetId: str, status: str) -> bool:
     """
     Update status dataset
     """
-    reuslt_request = update_dataset_status_info(datasetId, status)
+    reuslt_request = update_status_dataset_info(datasetId, status)
 
     if reuslt_request:
         return True
