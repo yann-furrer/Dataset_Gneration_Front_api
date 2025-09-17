@@ -29,15 +29,15 @@ class TaskSchema(TypedDict):
     dataset_fields_list =   Optional[list]
 
 
-# Utilisation
-task: TaskSchema = {
-    "id": 1,
-    "dataset_id_row": "uuid",
-    "name": "Jean Dupont",
-    "email": "jean@example.com",
-    "active": True,
-    "age": 30
-}
+# EX Utilisation
+# task: TaskSchema = {
+#     "id": 1,
+#     "dataset_id_row": "uuid",
+#     "name": "Jean Dupont",
+#     "email": "jean@example.com",
+#     "active": True,
+#     "age": 30
+# }
 
 def send_message_to_celery_queue(message_body: TaskSchema):
     """
@@ -88,6 +88,12 @@ def send_message_to_celery_queue(message_body: TaskSchema):
     
     print(f"Message sent to {CELERY_QUEUE_NAME}")
     connection.close()
+
+
+
+
+
+
 
 
 # # # Example to call your mock function for test queue

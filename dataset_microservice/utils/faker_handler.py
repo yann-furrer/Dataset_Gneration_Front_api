@@ -162,7 +162,7 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
       
         faker_exist_response = await self.check_faker_type_exists(faker_type_name=str(elem_to_analyze), client_id=client_id)
         print("-->",faker_exist_response)
-        if faker_exist_response["newCategory"] == False and faker_exist_response["function"] != "empty":
+        if not faker_exist_response["newCategory"] and faker_exist_response.get("function", "empty") != "empty":
             print("Le type faker existe dans la base de données MongoDB.")
             return faker_exist_response["function"]
         
@@ -251,7 +251,7 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         return dict(faker_category), list(faker_category.keys())
         
 # a = FakerHandler()
-# # a.check_faker_type_exists(faker_type_name="company", client_id="12345")
+# a.check_faker_type_exists(faker_type_name="company", client_id="12345")
 # asyncio.run(a.generate_faker_list_IA_auto({"company": "AWS"}, client_id="12345"))
-# # asyncio.run(a.check_faker_type_exists({"gay": "kljkjnjknhkj"}, client_id="12345"))
-# # a.update_faker_type_on_mongo_db(faker_id="12345", new_faker_list=["new_value1", "new_value2"])
+# asyncio.run(a.check_faker_type_exists({"gay": "kljkjnjknhkj"}, client_id="12345"))
+# a.update_faker_type_on_mongo_db(faker_id="12345", new_faker_list=["new_value1", "new_value2"])

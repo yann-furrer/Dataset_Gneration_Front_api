@@ -2,7 +2,7 @@ import os, sys, re
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from config import *
+from config import text, session
 
 
 # Save dataset config mixe first saveing and saving dataset

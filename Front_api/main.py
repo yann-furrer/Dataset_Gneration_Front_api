@@ -1,7 +1,7 @@
 import httpx, os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from api.routes import sse, dev_token, user, dataset, dataset_sample
+from api.routes import sse, dev_token, user, dataset, dataset_sample, datamesh
 load_dotenv()
 app = FastAPI()
 
@@ -19,7 +19,6 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    # allow_credentials=True,
     # allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     # allow_headers=["Content-Type", "Authorization"],
     allow_credentials=True,
@@ -34,6 +33,7 @@ app.include_router(user.router)
 app.include_router(dev_token.router)
 app.include_router(dataset.router)
 app.include_router(dataset_sample.router)
+app.include_router(datamesh.router)
 
 
 @app.get("/welcome")

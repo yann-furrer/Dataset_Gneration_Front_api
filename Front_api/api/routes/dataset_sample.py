@@ -113,7 +113,7 @@ async def insert_faker_type(request: Request, userId: str = Depends(get_session_
             json={"client_id": userId, "faker_name": faker_type_name, "faker_type_id": faker_type_id, "faker_list": faker_list, "category": category, "description": "None"})
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
-        
+    print("response.json():", response.json())
     return JSONResponse( response.json())
 
 

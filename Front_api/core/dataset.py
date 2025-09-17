@@ -221,6 +221,22 @@ def get_dataset_config_info(datasetId: str, userId: str) -> dict:
 
 def select_dataset_for_historical(userId: str, offset: int) -> dict:
     result_request = select_dataset_historical_offset(userId, offset)
+    if result_request is False:
+         data_dict = [
+        {
+            "id": "vide",
+            "nbRows": "vide",
+            "datasetConfigId": "vide",
+            "clientId": "vide",
+            "campaignId": "vide",
+            "status": "vide",
+            "FinishedAt": "vide",
+            "TimeToGenerate": "vide",
+            "datasetName": "vide",
+            "datasetNameSystem": "vide",
+        }
+    ]
+        
     data_dict = [
         {
             "id": item[0],

@@ -363,6 +363,9 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
     return {"message": "Dataset {dataset_name} ajouter à queue !"}
 
 
+
+@router.post("/dataset/generate_dataset_datafusion")
+
 @router.post("/dataset/update_finished_dataset")
 # cette route est uniquement appellé par le back il faudra a terme verfier que c'est bien le back qui appelle
 async def update_finished_dataset_info(request: Request):

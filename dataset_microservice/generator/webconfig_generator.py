@@ -136,13 +136,13 @@ class WebConfigGenerator(FakerHandler):
 
         return node
 
-    async def build_schema(self, input_data, root_name="rule_1"):
+    async def build_schema(self, input_data : dict, root_name="rule_1"):
         # 1) extraction des placeholders
         placeholders = self.extract_placeholders(input_data)
 
         # 2) définition en batch
         placeholder_mapping = await self.batch_define_faker_types(placeholders)
-
+        print(type(input_data))
         # 3) génération du schéma
         root = {
             "fieldname": root_name,
