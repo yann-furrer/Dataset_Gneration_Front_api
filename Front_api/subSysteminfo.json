@@ -1,18 +1,41 @@
 {
-    "Explorer":{
-    "name": "Explorer",
+    "Free":{
+    "name": "Free",
     "realism" : false,
-    "maxRows" : 3000
-},
-"Startup":{
-    "name": "Startup",
+    "maxRows" : 10000,
+    "datamesh": false,
+    "fakerType": 10,
+    "IA": false,
+    "API": false},
+
+    "Basic":{
+        "name": "Basic",
+        "realism" : true,
+        "fakerType": 20,
+        "maxRows" : 100000,
+        "datamesh": false,
+        "IA": false,
+        "API": true
+    },
+
+"Pro":{
+    "name": "Pro",
     "realism" : true,
-    "maxRows" : 500000
+    "maxRows" : 500000,
+    "datamesh": false,
+    "fakerType": 200,
+
+    "IA": true,
+    "API": true
 },
 
 "Entreprise":{
     "name": "Entreprise",
     "realism" : true,
-    "maxRows" : -1
+    "maxRows" : -1,
+    "datamesh": false,
+    "fakerType": -1,
+    "IA": true,
+    "API": true
 }
 }

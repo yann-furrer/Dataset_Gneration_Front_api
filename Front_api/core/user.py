@@ -24,7 +24,7 @@ def get_subscription(userId: str) -> str:
     """
 
     result_request: str = get_user_subscription(userId)
-    if result_request == None:
+    if result_request is None:
         result_request = "Explorer"
     return result_request
 

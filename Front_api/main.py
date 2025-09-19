@@ -1,7 +1,7 @@
 import httpx, os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from api.routes import sse, dev_token, user, dataset, dataset_sample, datamesh
+from api.routes import sse, dev_token, user, dataset, dataset_sample, datamesh, stripe
 load_dotenv()
 app = FastAPI()
 
@@ -34,7 +34,7 @@ app.include_router(dev_token.router)
 app.include_router(dataset.router)
 app.include_router(dataset_sample.router)
 app.include_router(datamesh.router)
-
+app.include_router(stripe.router)
 
 @app.get("/welcome")
 async def welcome():
