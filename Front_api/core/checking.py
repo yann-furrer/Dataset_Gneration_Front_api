@@ -2,7 +2,7 @@ import os , sys, uuid
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
-from database.queries.security import check_session_token, check_user_api_token, check_user_suscription_limit
+from database.queries.security import check_session_token, check_user_suscription_limit
 from database.queries.dev_api import select_dev_token_info
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
@@ -28,13 +28,30 @@ def generate_user_api_token() -> str:
     return token
 
 
+def check_var_is_none(*args)-> None:
+    list_args = list(args)
+    for arg in list_args:
+        if arg is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing value of the variable {arg} in the request body",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    if any(value is None for value in args):
+        raise HTTPException(
+            status_code=400,
+            detail="Missing value of the variable in the request body"+str(args),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 def check_user_api_token(token : str, nb_rows_to_generate : int) -> bool:
     """
     Vérifie si le token est valide
     """
     try :
         token_info = select_dev_token_info(token)
-        if token_info == False:
+        if token_info is False:
             raise HTTPException(
                 status_code=400,
                 detail=" Token not found or invalid",

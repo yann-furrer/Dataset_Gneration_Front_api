@@ -1,5 +1,8 @@
 {
     "Free":{
+    "id_m" : null,
+    "id_y" : null,
+
     "name": "Free",
     "realism" : false,
     "maxRows" : 10000,
@@ -9,7 +12,12 @@
     "API": false},
 
     "Basic":{
-        "name": "Basic",
+
+    "id_m" : "plink_1S8UbDRqPVvCKFePLzMAW3wa",
+    "id_y" : "plink_1SDtBRRqPVvCKFePc6NG3BJj",
+    "id_test_m" : "plink_1SGc9hRqxJWcutRZeFUIecHU",
+    "id_test_y" : "plink_1SGc8tRqxJWcutRZZgicEsfu",
+    
         "realism" : true,
         "fakerType": 20,
         "maxRows" : 100000,
@@ -19,7 +27,11 @@
     },
 
 "Pro":{
-    "name": "Pro",
+    "id_m" : "plink_1SDtDARqPVvCKFePY5Xut3GD",
+    "id_y" : "plink_1SDtDZRqPVvCKFeP1HSkHNt2",
+    "id_test_m" : "plink_1SGcAsRqxJWcutRZD1BE6VHI",
+    "id_test_y" : "plink_1SGc8tRqxJWcutRZZgicEsfu",
+    
     "realism" : true,
     "maxRows" : 500000,
     "datamesh": false,
@@ -30,6 +42,8 @@
 },
 
 "Entreprise":{
+    "id_m" : "compagny",
+    "id_y" : "compagny",
     "name": "Entreprise",
     "realism" : true,
     "maxRows" : -1,

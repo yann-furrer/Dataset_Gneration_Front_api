@@ -1,7 +1,7 @@
 import os , sys, re
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from config import *
+from config import session , text
 
 
 
@@ -69,12 +69,12 @@ INSERT INTO public."Suscription"(
 	ON CONFLICT ("userId") DO NOTHING;
     """
 
-def insert_subscription_if_not_exist(userId : str, status : str, currentPeriodEnd : str, suscriptionType : str = "Explorer", nbRowsMaxSuscribed : int = 3000) -> bool:
+def insert_subscription_if_not_exist(userId : str, status : str, currentPeriodEnd : str, suscriptionType : str = "Free", nbRowsMaxSuscribed : int = 3000, active = True) -> bool:
     """
     Insert new subscription
     """
     try:
-        session.execute(text(INSERT_SUBSCRIPTION_IF_NOT_EXIST), {"userId": userId, "status" : status, "status": "active", "currentPeriodEnd": currentPeriodEnd, "suscriptionType": suscriptionType, "nbRowsMaxSuscribed": nbRowsMaxSuscribed})
+        session.execute(text(INSERT_SUBSCRIPTION_IF_NOT_EXIST), {"userId": userId, "status" : status, "active": active, "currentPeriodEnd": currentPeriodEnd, "suscriptionType": suscriptionType, "nbRowsMaxSuscribed": nbRowsMaxSuscribed})
         session.commit()
         return True
     except Exception as error:

@@ -8,6 +8,8 @@ with open("./core/fakerlist.json", "r") as f:
 
 
 
+
+
 def list_variables_type(yaml_content: dict, number_list: list = None, date_list: list = None) -> tuple[list, list]:
     """
     Liste récursivement les champs de type number (integer, float) et date
@@ -103,7 +105,7 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
                     error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{field}' n'est pas valide.")
 
                 elif not field.startswith("wf") and re.match(r"^wf\d+$", field) :
-                    error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide. vous avec un problème de workflow")
+                    error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{field}' n'est pas valide. vous avec un problème de workflow")
 
                 elif field == "allowedValues" and isinstance(rules.get("allowedValues"), list):
                     if not all(isinstance(x, (int, float)) for x in rules.get("allowedValues")):

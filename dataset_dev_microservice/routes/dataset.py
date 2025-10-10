@@ -1,20 +1,24 @@
 
-import os , sys, json, uuid
+import os
+import sys
+import uuid
 from fastapi.security import  HTTPBearer
-from fastapi import APIRouter, HTTPException, Request, Depends, BackgroundTasks, Body
+from fastapi import APIRouter,Query, HTTPException, Request, Depends, BackgroundTasks, Body
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from schema.dataset_shema import *
-from core.queue_config import send_message_to_celery_queue, TaskSchema
-from core.checking import  check_dev_token_validity, check_dev_token, get_dev_token_info
+from core.checking import  check_dev_token, get_dev_token_info
 from core.dev_utils import check_yaml_is_valid
-
-router = APIRouter()
-security = HTTPBearer()  
+from core.queue_config import send_message_to_celery_queue, TaskSchema
+from schema.dataset_shema import (
+    GenerateDatasetRequest, CheckYamlSuccessResponse, CheckYamlRequest, CheckYamlErrorDetail)
 
 #stock tout les processus de génération en cours
 generation_processes_list = {}
 
+router = APIRouter()
+security = HTTPBearer()  
+
+#utilitaire
 def delete_generation_process(process_id: str, status: str) -> bool:
     """
     delete_generation_process
@@ -23,33 +27,55 @@ def delete_generation_process(process_id: str, status: str) -> bool:
         del generation_processes_list[process_id]
 
 
-@router.post(
-    "/dev/generate_dataset",
-    summary="Générer un dataset",
+
+# ==============================================================
+# 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `S3 et DATASET`
+# --------------------------------------------------------------
+# 🔍 Contexte :
+#   - Ces routes manipulent uniquement la configuration des datasets.
+#   - Aucune interaction avec `RULESCONFIG` n'est possible.
+#   - Dans d'autres fichiers, certaines routes peuvent être hybrides
+#     et toucher à la fois `DATASET` et `D`.
+# ==============================================================
+
+
+
+@router.get(
+    "/dev/ping_generation_process",
+    summary="Vérifie le statut d'un processus de génération",
     description=(
-        "Cette route permet de générer un jeu de données de test de manière asynchrone. "
-        "Elle valide le contenu YAML envoyé, ajoute la tâche à la file RabbitMQ, et retourne un `process_id` "
-        "permettant de suivre l'avancement via `/dev/ping_generation_process`."
+        "Cette route permet de vérifier le statut d'un dataset en cours de génération. "
+        "Le `process_id` est fourni en tant que paramètre de requête, il preivent de la requête de `/dev/generate_dataset`. "
+        "Un token développeur valide est requis pour accéder à cette route." \
+        "Le statut retourné peut être : `waiting`, `running`, `success`, `error`, ou `None` si le processus est inconnu."
+        "Lorsque le statut est `success`, un champs supplémentaire `s3_url` est retourné contenant le dataset généré. Attention, "
+        "ce champs n'est disponible que 15 minutes avant expiration"
     ),
-    response_model=GenerateDatasetResponse,
-    response_description="ID du processus de génération et message de confirmation",
-    status_code=200,
-    responses={
-        400: {
-            "description": "Requête invalide : données manquantes ou incorrectes",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "Missing required fields in the request body or None value"
-                    }
-                }
-            },
-        },
-        422: {
-            "description": "Erreur de validation des champs (types, format)",
-        },
-    },
 )
+async def ping_generation_process(
+    process_id: str = Query(..., description="Identifiant unique du processus de génération"),
+    _ = Depends(check_dev_token)
+):
+    """
+    Retourne le statut actuel d’un processus de génération de dataset initié via `/dev/generate_dataset`.
+
+    - **process_id** : l’identifiant du processus (UUID) retourné lors de l’appel initial.
+    - **status** peut être : `"waiting"`, `"running"`, `"success"`, `"error"`, ou `None` si le processus est inconnu.
+    """
+    print("process_id -->", process_id)
+    print("generation_processes_list -->", generation_processes_list)
+
+    status = generation_processes_list.get(process_id)
+    if status is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Le process_id fourni est invalide ou expiré.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return {"status": status}
+
+
 async def generate_dataset(
     request: Request,
     api_key: str = Depends(get_dev_token_info),
@@ -93,7 +119,8 @@ async def generate_dataset(
 
     generation_processes_list[str(process_id)] = "waiting"
 
-    return {f"message": "Dataset {dataset_name} ajouter à queue ! with process_id {process_id}", "process_id": process_id}
+    return {"message": "Dataset {dataset_name} ajouter à queue ! with process_id {process_id}", "process_id": process_id}
+
 
 
 @router.post("/dev/update_process_status/{process_id}")
@@ -117,56 +144,15 @@ async def update_process_status(request: Request, process_id: str):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from fastapi import Query, HTTPException
-@router.get(
-    "/dev/ping_generation_process",
-    summary="Vérifie le statut d'un processus de génération",
-    description=(
-        "Cette route permet de vérifier le statut d'un dataset en cours de génération. "
-        "Le `process_id` est fourni en tant que paramètre de requête, il preivent de la requête de `/dev/generate_dataset`. "
-        "Un token développeur valide est requis pour accéder à cette route." \
-        "Le statut retourné peut être : `waiting`, `running`, `success`, `error`, ou `None` si le processus est inconnu."
-        "Lorsque le statut est `success`, un champs supplémentaire `s3_url` est retourné contenant le dataset généré. Attention, "
-        "ce champs n'est disponible que 15 minutes avant expiration"
-    ),
-)
-async def ping_generation_process(
-    process_id: str = Query(..., description="Identifiant unique du processus de génération"),
-    _ = Depends(check_dev_token)
-):
-    """
-    Retourne le statut actuel d’un processus de génération de dataset initié via `/dev/generate_dataset`.
-
-    - **process_id** : l’identifiant du processus (UUID) retourné lors de l’appel initial.
-    - **status** peut être : `"waiting"`, `"running"`, `"success"`, `"error"`, ou `None` si le processus est inconnu.
-    """
-    print("process_id -->", process_id)
-    print("generation_processes_list -->", generation_processes_list)
-
-    status = generation_processes_list.get(process_id)
-    if status is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Le process_id fourni est invalide ou expiré.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return {"status": status}
+# ==============================================================
+# 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `S3 et DATASET`
+# --------------------------------------------------------------
+# 🔍 Contexte :
+#   - Ces routes manipulent uniquement la configuration des datasets.
+#   - Aucune interaction avec `RULESCONFIG` n'est possible.
+#   - Dans d'autres fichiers, certaines routes peuvent être hybrides
+#     et toucher à la fois `DATASET` et `D`.
+# ==============================================================
 
 
 

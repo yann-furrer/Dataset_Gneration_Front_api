@@ -35,7 +35,7 @@ async def update_quota_consumption(userId : str, nbRows: str):
 @router.get("/user/get_subscription")
 async def get_subscription_type(userId : str):
     """
-    Add subscription to user, en cas d'erreur renvoie l'abonnement explorer (le gratuit et le plus limité)
+    Add subscription to user, en cas d'erreur renvoie l'abonnement pro (le gratuit et le plus limité)
     """
     sub = get_subscription(userId)
     print("sub -->", sub)

@@ -25,12 +25,12 @@ def get_subscription(userId: str) -> str:
 
     result_request: str = get_user_subscription(userId)
     if result_request is None:
-        result_request = "Explorer"
+        result_request = "Free"
     return result_request
 
 
 def insert_user_subscription(
-    userId: str, status: str, subscriptionType: str = "Explorer", period: str = "month"
+    userId: str, status: str, subscriptionType: str = "Free", period: str = "month"
 ) -> bool:
     """
     Insert new API token
@@ -58,7 +58,7 @@ def insert_user_subscription(
 
 
 def insert_subscription_for_connexion_callback(
-    userId: str, status: str, subscriptionType: str = "Explorer", period: str = "month"
+    userId: str, status: str, subscriptionType: str = "Free", period: str = "month"
 ) -> bool:
     """
     Check if user is already subscribed

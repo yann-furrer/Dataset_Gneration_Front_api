@@ -277,10 +277,25 @@ def select_yaml_content_by_dataset_config_id(datasetId: str, userId: str) -> dic
         session.rollback()
         print(f"Error while selecting yaml content by dataset config id {datasetId}", e)
         return False
-    
+
+
+
+
+SELECT_YAMLCONFIG_WITH_DATACONFIG_BY_DATASET_ID = """
+With datsetconfigId AS (SELECT "datasetConfigId" FROM public."Dataset" WHERE "datasetId" = :datasetId AND "ownerId" = :userId)
+SELECT "yamlContent" FROM public."DatasetConfig" WHERE "datasetId" = :datsetconfigId AND "userId" = :userId;
 """
-INSERT QUERY
-"""
+def select_dataset_config_by_dataset_id(datasetId: str, userId: str) -> dict:
+    try:
+        request_yaml = session.execute(text(SELECT_YAMLCONFIG_WITH_DATACONFIG_BY_DATASET_ID), {"datasetId": datasetId, "userId": userId})
+        result_yaml = request_yaml.fetchall()
+        return result_yaml
+    except Exception as e:
+        session.rollback()
+        print(f"Error while selecting yaml content by dataset config id {datasetId}", e)
+        return False
+
+
 
 INSERT_ON_CONFLICT_DATASET_CONFIG = """
 INSERT INTO public."DatasetConfig"(
@@ -289,6 +304,9 @@ INSERT INTO public."DatasetConfig"(
     ON CONFLICT ("datasetId") DO UPDATE
     SET "yamlName" = :yamlName, "yamlContent" = :yamlContent, "draftResult" = :draftResult , "nbRows" = :nbRows, "updatedAt" = now();
     """
+
+
+
 # Par defaut on laisse le champs rulesId et campaingId vide car il sera ajouter dès la creation de celui ci dans le front
 # cela evite de complexifier la requete pour ajouter les rules
 def insert_dataset_config(datasetId: str, userId: str,  yamlName: str, yamlContent: str, draftResult: str, nbRows: int) -> bool:

@@ -1,11 +1,13 @@
-import httpx, os
+import httpx
+import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from api.routes import sse, dev_token, user, dataset, dataset_sample, datamesh, stripe
+from routes.dataset import dataset_post, dataset_get, dataset_delete
+from routes import sse, dev_token, user, dataset_sample, stripe, datamesh
+from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
 
 
 # Configuration CORS
@@ -31,7 +33,12 @@ app.add_middleware(
 app.include_router(sse.router)
 app.include_router(user.router)
 app.include_router(dev_token.router)
-app.include_router(dataset.router)
+
+
+app.include_router(dataset_delete.router)
+app.include_router(dataset_post.router)
+app.include_router(dataset_get.router)
+
 app.include_router(dataset_sample.router)
 app.include_router(datamesh.router)
 app.include_router(stripe.router)

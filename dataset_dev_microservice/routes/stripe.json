@@ -1,39 +1,33 @@
 {
     "api_version": "2025-08-27.basil",
-    "created": 1758295563,
+    "created": 1759854140,
     "data": {
         "object": {
             "adaptive_pricing": {
-                "enabled": false
+                "enabled": true
             },
             "after_expiration": null,
-            "allow_promotion_codes": true,
-            "amount_subtotal": 7800,
-            "amount_total": 0,
+            "allow_promotion_codes": false,
+            "amount_subtotal": 200,
+            "amount_total": 200,
             "automatic_tax": {
-                "enabled": true,
-                "liability": {
-                    "type": "self"
-                },
-                "provider": "stripe",
-                "status": "complete"
+                "enabled": false,
+                "liability": null,
+                "provider": null,
+                "status": null
             },
-            "billing_address_collection": "required",
+            "billing_address_collection": "auto",
             "cancel_url": "https://stripe.com",
-            "client_reference_id": "cmfjrhe0j0000w1ci5fcx54h1",
+            "client_reference_id": "cmfuwq8rg0000w16c6511rc3l",
             "client_secret": null,
-            "collected_information": {
-                "business_name": null,
-                "individual_name": null,
-                "shipping_details": null
-            },
+            "collected_information": null,
             "consent": null,
             "consent_collection": {
                 "payment_method_reuse_agreement": null,
                 "promotions": "none",
                 "terms_of_service": "none"
             },
-            "created": 1758295523,
+            "created": 1759854109,
             "currency": "eur",
             "currency_conversion": null,
             "custom_fields": [],
@@ -43,52 +37,64 @@
                 "submit": null,
                 "terms_of_service_acceptance": null
             },
-            "customer": "cus_T5GjkpC3kcxNi4",
+            "customer": null,
             "customer_creation": "if_required",
             "customer_details": {
                 "address": {
-                    "city": "Saint-André-de-Cubzac",
+                    "city": null,
                     "country": "FR",
-                    "line1": "7 Rue Henri Amédée Bellivier",
+                    "line1": null,
                     "line2": null,
-                    "postal_code": "33240",
+                    "postal_code": null,
                     "state": null
                 },
                 "business_name": null,
-                "email": "furrer.yann@gmail.com",
+                "email": "knvdsjkvnjk@jerk.com",
                 "individual_name": null,
-                "name": "yann furrer",
+                "name": "dezkfn",
                 "phone": null,
                 "tax_exempt": "none",
                 "tax_ids": []
             },
             "customer_email": null,
-            "discounts": [
-                {
-                    "coupon": null,
-                    "promotion_code": "promo_1S8dLTRqPVvCKFePaymhXemc"
+            "discounts": [],
+            "expires_at": 1759940509,
+            "id": "cs_test_a1QtIWhbbStd8fNGNJHVeRa6xzeVKpXisduxKOhtfWNEnuAFAgGknksUsa",
+            "invoice": null,
+            "invoice_creation": {
+                "enabled": false,
+                "invoice_data": {
+                    "account_tax_ids": null,
+                    "custom_fields": null,
+                    "description": null,
+                    "footer": null,
+                    "issuer": null,
+                    "metadata": {},
+                    "rendering_options": null
                 }
-            ],
-            "expires_at": 1758381923,
-            "id": "cs_live_b1WI7yzKyVv0zjhtfB5XfAXlSwW7dFgyyzhk3kb0JY2VQzsEDI5ISnjhSS",
-            "invoice": "in_1S96BkRqPVvCKFePZU7pWea2",
-            "invoice_creation": null,
-            "livemode": true,
+            },
+            "livemode": false,
             "locale": "auto",
             "metadata": {},
-            "mode": "subscription",
+            "mode": "payment",
             "object": "checkout.session",
             "origin_context": null,
-            "payment_intent": null,
-            "payment_link": "plink_1S8d8qRqPVvCKFePGTcEbcW6",
-            "payment_method_collection": "always",
+            "payment_intent": "pi_3SFdeZRqxJWcutRZ14lluxR2",
+            "payment_link": "plink_1SFdSLRqxJWcutRZSEBIzYoF",
+            "payment_method_collection": "if_required",
             "payment_method_configuration_details": {
-                "id": "pmc_1S81MERqPVvCKFeP6KuiGCSc",
+                "id": "pmc_1S81MYRqxJWcutRZ7P2Ni496",
                 "parent": null
             },
-            "payment_method_options": {},
+            "payment_method_options": {
+                "card": {
+                    "request_three_d_secure": "automatic"
+                }
+            },
             "payment_method_types": [
                 "card",
+                "bancontact",
+                "eps",
                 "klarna",
                 "link",
                 "amazon_pay"
@@ -99,23 +105,17 @@
                 "enabled": false
             },
             "recovered_from": null,
-            "saved_payment_method_options": {
-                "allow_redisplay_filters": [
-                    "always"
-                ],
-                "payment_method_remove": "disabled",
-                "payment_method_save": null
-            },
+            "saved_payment_method_options": null,
             "setup_intent": null,
             "shipping_address_collection": null,
             "shipping_cost": null,
             "shipping_options": [],
             "status": "complete",
             "submit_type": "auto",
-            "subscription": "sub_1S96C9RqPVvCKFePk7ayxFQD",
+            "subscription": null,
             "success_url": "https://stripe.com",
             "total_details": {
-                "amount_discount": 7800,
+                "amount_discount": 0,
                 "amount_shipping": 0,
                 "amount_tax": 0
             },
@@ -124,8 +124,8 @@
             "wallet_options": null
         }
     },
-    "id": "evt_1S96CGRqPVvCKFePfFXMI6ab",
-    "livemode": true,
+    "id": "evt_1SFdeaRqxJWcutRZRGvu7aCR",
+    "livemode": false,
     "object": "event",
     "pending_webhooks": 1,
     "request": {

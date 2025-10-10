@@ -2,7 +2,7 @@
 import os , sys, re
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from config import *
+from config import session, text
 
 
 
@@ -23,9 +23,8 @@ def select_validity_token(token):
         result = request.fetchone()
         response = [{"id": result[0], "quotaUsed": result[1], "price": result[2], "limit": result[3], "expireAt": result[4]}]
         return response
-    except Exception as error:
+    except Exception:
          session.rollback()
-         print("error -->",error)
          return False
 
 
@@ -42,7 +41,7 @@ def check_existing_dev_token(token):
     try:
         request = session.execute(text(CHECK_DEV_TOKEN), {"token": token})
         result = request.fetchone()
-        if result == None:
+        if result is None:
             return False
         return result
     except Exception as error:

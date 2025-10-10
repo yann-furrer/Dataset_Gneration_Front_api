@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 
@@ -10,14 +11,14 @@ from database.queries.stripe import  update_stripe_subscription
 
 
 
-def core_update_stripe_subscription(userId: str, stripeSubscriptionId: str, stripeCustomerId: str, stripePriceId: str, stripeProductId: str,
+def core_update_stripe_subscription(userId: str, stripeSubscriptionId: str, stripeCustomerId: str, stripePriceId: str,
     status: str, currentPeriodEnd: str, suscriptionType: str, nbRowMaxSuscribed: int
                                ) -> bool:
     """
     Update stripe subscription
     """
-    result_request = update_stripe_subscription(userId, stripeSubscriptionId, stripeCustomerId, stripePriceId, stripeProductId,
-        status, currentPeriodEnd, suscriptionType, nbRowMaxSuscribed
+    result_request = update_stripe_subscription(userId, stripeSubscriptionId, stripeCustomerId, stripePriceId, 
+        status, datetime.datetime.fromtimestamp(currentPeriodEnd), suscriptionType, nbRowMaxSuscribed
     )
 
     if result_request:

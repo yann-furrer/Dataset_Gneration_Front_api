@@ -6,15 +6,15 @@ from config import session, text
 
 
 UPDATE_STRIPE_SUBSCRIPTION = """
-UPDATE public."StripeSubscription" SET "userId" = :userId, "stripeSubscriptionId" = :stripeSubscriptionId, 
+UPDATE public."Suscription" SET "userId" = :userId, "stripeSubscriptionId" = :stripeSubscriptionId, 
 "stripeCustomerId" = :stripeCustomerId, "stripePriceId" = :stripePriceId, 
-"status" = :status, "currentPeriodEnd" = :currentPeriodEnd, "updatedAt" = :updatedAt, 
-"suscriptionType" = :suscritpionType, nbRowMaxSuscribed = :nbRowMaxSuscribed, nbRowsUsed = 0
+"status" = :status, "currentPeriodEnd" = :currentPeriodEnd, "updatedAt" = NOW(), 
+"suscriptionType" = :suscriptionType, "nbRowsMaxSuscribed" = :nbRowsMaxSuscribed, "nbRowsUsed" = 0
 WHERE "userId" = :userId;
 """
 
-def update_stripe_subscription(userId: str, stripeSubscriptionId: str, stripeCustomerId: str, stripePriceId: str, stripeProductId: str,
-    status: str, currentPeriodEnd: str, suscriptionType: str, nbRowMaxSuscribed: int
+def update_stripe_subscription(userId: str, stripeSubscriptionId: str, stripeCustomerId: str, stripePriceId: str,
+    status: str, currentPeriodEnd: str, suscriptionType: str, nbRowsMaxSuscribed: int
                                ) -> bool:
     """
     Update stripe subscription
@@ -26,12 +26,11 @@ def update_stripe_subscription(userId: str, stripeSubscriptionId: str, stripeCus
                 "stripeSubscriptionId": stripeSubscriptionId,
                 "stripeCustomerId": stripeCustomerId,
                 "stripePriceId": stripePriceId,
-                "stripeProductId": stripeProductId,
                 "userId": userId,
                 "status": status,
                 "currentPeriodEnd": currentPeriodEnd,
                 "suscriptionType": suscriptionType,
-                "nbRowMaxSuscribed": nbRowMaxSuscribed,
+                "nbRowsMaxSuscribed": nbRowsMaxSuscribed,
             },
         )
         session.commit()
