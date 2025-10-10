@@ -10,23 +10,19 @@ app = FastAPI()
 
 
 # Configuration CORS
+
 origins = [
-    "http://localhost:3000",  # Remplacez par votre domaine frontend en développement
-    "https://d8bd-2a02-842a-41-2201-b8a0-4372-4c23-4b90.ngrok-free.app",
-    "https://datasetgenerationfront-dev.up.railway.app",
-    "https://syntetica.net/"
-    # Vous pouvez ajouter d'autres origines si nécessaire
+    "https://syntetica.net",      # ton site prod
+    "https://www.syntetica.net",  # version avec www
+    "http://localhost:3000",      # ton front local
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    # allow_credentials=True,
-    # allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    # allow_headers=["Content-Type", "Authorization"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=origins,               # origines autorisées
+    allow_credentials=True,              # cookies / sessions autorisés
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],  # méthodes HTTP autorisées
+    allow_headers=["content-type", "authorization", "sessiontoken"],  # headers autorisés
 )
 
 app.include_router(dev_token_get.router)
