@@ -15,5 +15,5 @@ security = HTTPBearer()
 async def delete_token(token_id: str, user_id: str = Depends(get_session_token)):
     response = delete_dev_token(token_id)
     if response is False:
-        HTTPException(status_code=400, detail="Error while deleting token")
+        raise HTTPException(status_code=400, detail="Error while deleting token")
     return {"message": "Dev token deleted!"}

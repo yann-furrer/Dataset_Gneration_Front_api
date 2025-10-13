@@ -1,17 +1,17 @@
 import os
 import sys
-import json 
+import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import HTTPException
 from core.checking import check_var_is_none
 
 
-#dataset config
-from database.queries.dataset import (insert_dataset_config)
+# dataset config
+from database.queries.dataset import insert_dataset_config
 
-#dataset 
-from database.queries.dataset import (insert_dataset_info, insert_rules_config)
+# dataset
+from database.queries.dataset import insert_dataset_info, insert_rules_config
 
 
 # ==============================================================
@@ -23,7 +23,6 @@ from database.queries.dataset import (insert_dataset_info, insert_rules_config)
 #   - Dans d'autres fichiers, certaines routes peuvent être hybrides
 #     et toucher à la fois `DATASETCONFIG` et `RULESCONFIG`.
 # ==============================================================
-
 
 
 # def insert_dataset_config_info(
@@ -44,13 +43,14 @@ from database.queries.dataset import (insert_dataset_info, insert_rules_config)
 #     if reuslt_request:
 #         return True
 #     else:
-#         HTTPException(
+#       raise HTTPException(
 #             status_code=400,
 #             detail="Error while inserting dataset config , try again your yaml is not saved, maybe duplicate datasetId",
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
 
-#insert_dataset_config_and_rules_config_info
+
+# insert_dataset_config_and_rules_config_info
 def core_insert_dataset_config(
     dataset_config_id: str,
     user_id: str,
@@ -60,7 +60,7 @@ def core_insert_dataset_config(
     nb_rows: int,
     rules_id: str,
     rules_name: str,
-    rules_content: str,
+    rules_content: dict,
     campaign_id: str = None,
 ) -> bool:
     """
@@ -88,13 +88,13 @@ def core_insert_dataset_config(
     if result_request_dataset_config and result_rules_config:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting dataset config or dataset rules config , try again your yaml is not saved, maybe duplicate datasetId",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    
+
 # ==============================================================
 # 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `DATASET`
 # --------------------------------------------------------------
@@ -106,8 +106,7 @@ def core_insert_dataset_config(
 # ==============================================================
 
 
-
-#inserting_dataset_info_core
+# inserting_dataset_info_core
 def core_inserting_dataset_info(
     dataset_row_id,
     dataset_config_id: int,
@@ -132,12 +131,14 @@ def core_inserting_dataset_info(
     if result_request is True:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting dataset info",
             headers={"WWW-Authenticate": "Bearer"},
         )
-#insert_rules_config
+
+
+# insert_rules_config
 def core_insert_rules_config(
     rules_id: str,
     user_id: str,
@@ -155,9 +156,8 @@ def core_insert_rules_config(
     if result_request is True:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting rules config",
             headers={"WWW-Authenticate": "Bearer"},
         )
-

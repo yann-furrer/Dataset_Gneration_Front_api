@@ -10,8 +10,6 @@ from core.dev_utils import *
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 
-
-
 def delete_dev_token(token_id: str) -> bool:
     """
     Delete API token
@@ -20,7 +18,7 @@ def delete_dev_token(token_id: str) -> bool:
     if result_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while deleting token",
             headers={"WWW-Authenticate": "Bearer"},

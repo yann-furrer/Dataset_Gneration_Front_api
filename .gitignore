@@ -12,6 +12,7 @@ dataset_dev_microservice/core/__pycache__/
 dataset_dev_microservice/core/dev_token/__pycache__/
 dataset_dev_microservice/core/dataset/__pycache__/
 dataset_dev_microservice/schema/__pycache__/
+dataset_dev_microservice/utils/__pycache__/
 
 
 
@@ -28,3 +29,6 @@ dataset_dev_microservice/.env
 dataset_dev_microservice/database/.env
 dataset_dev_microservice/schema/__pycache__/dataset_shema.cpython-312.pyc
 dataset_dev_microservice/schema/__pycache__/dataset_shema.cpython-312.pyc
+dataset_dev_microservice/routes/dataset.py
+.gitignore
+.DS_Store

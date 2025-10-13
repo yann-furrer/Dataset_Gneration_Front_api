@@ -8,6 +8,46 @@ from config import session, text
 
 
 
+
+
+
+SELECT_API_CREDIT_FROM_TOKEN = """
+SELECT "ApiCredit" FROM public."Suscription" WHERE "userId" = (SELECT "userId" FROM public."APIHandle" WHERE "token" = :token);
+"""
+def select_api_credit_from_token(token) -> int | bool :
+    """
+    Récupère le nombre de lignes consommées par un utilisateur
+    """
+    try:
+        result = session.execute(text(SELECT_API_CREDIT_FROM_TOKEN), {"token": token})
+        row = result.mappings().first()
+        return row
+    except Exception as error:
+         session.rollback()
+         print("error -->",error)
+         return False
+
+
+# Récupère le user id d'un token
+SELECT_USER_ID_FROM_TOKEN = """
+SELECT "userId" FROM public."APIHandle" WHERE "token" = :token;
+"""
+def select_user_id_from_token(token) -> str | bool :
+    """
+    Récupère le user id d'un token
+    """
+    try:
+        result = session.execute(text(SELECT_USER_ID_FROM_TOKEN), {"token": token})
+        row = result.mappings().first()
+        print("row -->", row)
+        if row is None:
+            return False
+        return row
+    except Exception as error:
+         session.rollback()
+         print("error -->",error)
+         return False
+
 # Vérifie si le token possède bien les droits pour faire une requête
 SELECT_VALIDITY_TOKEN = """
 SELECT "userId", "quotaUsed", "price", "limit", "expireAt"  FROM public."APIHandle" WHERE "token" = :token;

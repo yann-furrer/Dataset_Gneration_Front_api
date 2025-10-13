@@ -1,9 +1,13 @@
 import os
 import sys
 from fastapi import HTTPException
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from database.queries.dataset import (update_finished_dataset_info, update_status_dataset_info)
+from database.queries.dataset import (
+    update_finished_dataset_info,
+    update_status_dataset_info,
+)
 
 # ==============================================================
 # 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `S3 et DATASET`
@@ -14,6 +18,7 @@ from database.queries.dataset import (update_finished_dataset_info, update_statu
 #   - Dans d'autres fichiers, certaines routes peuvent être hybrides
 #     et toucher à la fois `DATASET` et `D`.
 # ==============================================================
+
 
 def update_finished_dataset(
     dataset_name: str, datasetId: str, generationError: str, status: str
@@ -31,7 +36,7 @@ def update_finished_dataset(
     if reuslt_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while updating dataset info",
             headers={"WWW-Authenticate": "Bearer"},
@@ -47,7 +52,7 @@ def update_status_dataset(datasetId: str, status: str) -> bool:
     if reuslt_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while updating dataset status info",
             headers={"WWW-Authenticate": "Bearer"},

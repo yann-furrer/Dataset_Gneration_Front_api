@@ -20,7 +20,7 @@ def core_select_consumption_token_by_user_id(userId: str) -> int:
     result_request: int = select_consumption_token_by_user_id(userId)
 
     if result_request is False:
-            HTTPException(
+          raise HTTPException(
                 status_code=400,
                 detail="Error while inserting new token",
                 headers={"WWW-Authenticate": "Bearer"},
@@ -40,7 +40,7 @@ def core_select_dev_token_info(userId: str) -> bool:
         result_request = select_dev_token_info(userId)
 
         if result_request is False:
-            HTTPException(
+          raise HTTPException(
                 status_code=400,
                 detail="Error while inserting new token",
                 headers={"WWW-Authenticate": "Bearer"},
@@ -49,7 +49,7 @@ def core_select_dev_token_info(userId: str) -> bool:
         return result_request
     except Exception as e:
         print("error -->", e)
-        HTTPException(
+        raise HTTPException(
             status_code=401,
             detail="User subscription not found or invalid",
             headers={"WWW-Authenticate": "Bearer"},
@@ -63,7 +63,7 @@ Retourne le nombre de crédits d'un utilisateur
     result_request = select_api_credit_from_user_id(userId)
 
     if result_request is False:
-            HTTPException(
+          raise HTTPException(
                 status_code=400,
                 detail="Error while inserting new token",
                 headers={"WWW-Authenticate": "Bearer"},

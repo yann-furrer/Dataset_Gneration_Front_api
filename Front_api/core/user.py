@@ -50,7 +50,7 @@ def insert_user_subscription(
     if reuslt_request == True:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting new token",
             headers={"WWW-Authenticate": "Bearer"},
@@ -80,8 +80,8 @@ def insert_subscription_for_connexion_callback(
         subscriptionType,
         nbRowsMaxSubscribed,
     )
-    if response_status == False:
-        HTTPException(
+    if response_status is False:
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting new token",
             headers={"WWW-Authenticate": "Bearer"},
@@ -95,8 +95,8 @@ def update_quota(userId: str, nb_rows: int) -> bool:
     Update quota used
     """
     response_status: bool = update_quota_used(userId, nb_rows)
-    if response_status == False:
-        HTTPException(
+    if response_status is False:
+        raise HTTPException(
             status_code=400,
             detail="Error while updating quota used",
             headers={"WWW-Authenticate": "Bearer"},
@@ -116,7 +116,7 @@ def get_rows_generated(userId: str) -> bool:
     result_request: tuple = select_nbrows_by_dataset(userId)
     print("result_request -->", result_request)
     if result_request == False:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset historical",
             headers={"WWW-Authenticate": "Bearer"},
@@ -133,7 +133,7 @@ def get_statistics(userId: str) -> bool:
     # type (nbrows : int, day_number : int)
     result_request: tuple = select_statistics_by_user(userId)
     if result_request == False:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset historical",
             headers={"WWW-Authenticate": "Bearer"},

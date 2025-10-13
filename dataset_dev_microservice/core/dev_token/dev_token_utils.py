@@ -21,14 +21,14 @@ def check_config_validity(yaml_content: dict, rules_content: list = []) -> dict:
         yaml_content = yaml.safe_load(yaml_content)
     except Exception as e:
         print("error -->", e)
-        HTTPException(
+      raise HTTPException(
             status_code=400,
             detail="Error while convert to yaml check your syntax " + str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     if rules_content != [] and type(rules_content) != list:
-        HTTPException(
+      raise HTTPException(
             status_code=400,
             detail="Error while convert to rules check your syntax ",
             headers={"WWW-Authenticate": "Bearer"},

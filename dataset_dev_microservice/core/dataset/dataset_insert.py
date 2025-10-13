@@ -2,15 +2,16 @@ import os
 import sys
 import json
 from database.queries.dataset.dataset_insert import (
-    insert_dataset_config, insert_rules_config
-    )
-# dataset 
-from database.queries.dataset.dataset_insert import (
-    insert_dataset_info
-    )
+    insert_dataset_config,
+    insert_rules_config,
+)
+
+# dataset
+from database.queries.dataset.dataset_insert import insert_dataset_info
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import HTTPException
+
 
 # insert_dataset_config_info
 def core_insert_dataset_config_info(
@@ -31,18 +32,14 @@ def core_insert_dataset_config_info(
     if reuslt_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting dataset config , try again your yaml is not saved, maybe duplicate datasetId",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
-
-
-
-
-#insert_rules_config_info
+# insert_rules_config_info
 def core_insert_rules_config(
     rulesId: str,
     userId: str,
@@ -60,12 +57,11 @@ def core_insert_rules_config(
     if reuslt_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting rules config",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
 
 
 def core_insert_dataset_config_and_rules_config_info(
@@ -106,11 +102,12 @@ def core_insert_dataset_config_and_rules_config_info(
     if result_request_dataset_config and result_rules_config:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting dataset config or dataset rules config , try again your yaml is not saved, maybe duplicate datasetId",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 # ==============================================================
 # 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `DATASET`
@@ -121,7 +118,6 @@ def core_insert_dataset_config_and_rules_config_info(
 #   - Dans d'autres fichiers, certaines routes peuvent être hybrides
 #     et toucher à la fois `DATASET` et `D`.
 # ==============================================================
-
 
 
 def inserting_dataset_info(
@@ -149,7 +145,7 @@ def inserting_dataset_info(
     if result_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting dataset info",
             headers={"WWW-Authenticate": "Bearer"},

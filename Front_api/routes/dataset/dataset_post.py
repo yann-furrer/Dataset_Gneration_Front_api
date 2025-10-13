@@ -272,12 +272,13 @@ async def save_dataset_config_and_rules_config(
         nbRows,
     ]
 
-    print("yamlName", yamlName)
-    print("client_id", client_id)
+    # print("yamlName", yamlName)
+    # print("client_id", client_id)
     print("end_format", end_format)
-    print("yaml_content", yamlContent)
+    # print("yaml_content", yamlContent)
     print("dataset_config_id", dataset_config_id)
     print("nbRows", nbRows)
+    # print("xrulesContent", rulesContent)
 
     draftResult = {"test": "test"}
     check_var_is_none(body_value_list)

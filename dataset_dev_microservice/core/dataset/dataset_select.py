@@ -2,13 +2,21 @@ import os
 import sys
 from fastapi import HTTPException
 from core.s3_handle import S3Manager
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 # dataset et s3
-from database.queries.dataset import select_all_s3_url_from_dataset, select_dataset_config, select_dataset_historical_offset, select_yaml_and_rules_content_by_dataset_config_id
+from database.queries.dataset import (
+    select_all_s3_url_from_dataset,
+    select_dataset_config,
+    select_dataset_historical_offset,
+    select_yaml_and_rules_content_by_dataset_config_id,
+)
 
-#dataset config
+# dataset config
 from database.queries.dataset.dataset_select import (
-    select_dataset_historical_config_offset)
+    select_dataset_historical_config_offset,
+)
+
 # from fastapi.security import HTTPBearer
 
 # ==============================================================
@@ -43,15 +51,11 @@ def select_all_s3_url_dataset(ownerId: str) -> dict:
 
         return data_dict
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting S3 url datasetId not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-
-
-
 
 
 # ==============================================================
@@ -63,7 +67,7 @@ def select_all_s3_url_dataset(ownerId: str) -> dict:
 #   - Dans d'autres fichiers, certaines routes peuvent être hybrides
 #     et toucher à la fois `DATASET` et `D`.
 # ==============================================================
-#get_dataset_config_info
+# get_dataset_config_info
 def core_select_dataset_config(datasetId: str, userId: str) -> dict:
     """
     Get dataset config
@@ -73,7 +77,7 @@ def core_select_dataset_config(datasetId: str, userId: str) -> dict:
     if result_request != None:
         return result_request
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config",
             headers={"WWW-Authenticate": "Bearer"},
@@ -109,14 +113,15 @@ def select_dataset_config_and_rules_config(datasetId: str, userId: str) -> dict:
         or result_request == None
         or result_request["yamlContent"] == []
     ):
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config or rules config",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return result_request
 
-#get_dataset_config_historical_offset
+
+# get_dataset_config_historical_offset
 def core_select_dataset_historical_config_offset(userId: str, offset: int) -> dict:
     """
     Get dataset config
@@ -138,7 +143,7 @@ def core_select_dataset_historical_config_offset(userId: str, offset: int) -> di
         return data_dict
 
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail=f"Error while getting dataset config maybe offset is too high {offset}",
             headers={"WWW-Authenticate": "Bearer"},

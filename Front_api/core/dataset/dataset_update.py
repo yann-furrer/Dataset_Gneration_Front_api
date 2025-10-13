@@ -1,12 +1,12 @@
 import os
 import sys
-import json 
+import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import HTTPException
 from core.checking import check_var_is_none
 
-# dataset 
+# dataset
 from database.queries.dataset import (
     update_finished_dataset_info,
     update_status_dataset_info,
@@ -53,7 +53,7 @@ def update_finished_dataset(
     if reuslt_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while updating dataset info",
             headers={"WWW-Authenticate": "Bearer"},
@@ -69,7 +69,7 @@ def update_status_dataset(dataset_id: str, status: str) -> bool:
     if reuslt_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while updating dataset status info",
             headers={"WWW-Authenticate": "Bearer"},

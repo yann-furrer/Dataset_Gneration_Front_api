@@ -4,10 +4,8 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBearer
 from database.queries.dev_token.dev_token_insert import (
-    
     insert_api_token,
 )
-
 
 
 # Génération de token
@@ -23,16 +21,15 @@ def generate_token() -> str:
 
 
 # Insertion d'un token dans la table APIHandle
-#insert_dev_token
-def core_insert_api_token(userId: str, limit: int) -> bool:
+# insert_dev_token
+def core_insert_api_token(userId: str, limit: int, token: str) -> bool:
     """
     Insert new API token
     """
-    token = generate_token()
     expire: datetime = datetime.now() + timedelta(days=365)
     result_request = insert_api_token(userId, token, "*" * 17 + token[17:])
     if result_request is False:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while inserting new token",
             headers={"WWW-Authenticate": "Bearer"},

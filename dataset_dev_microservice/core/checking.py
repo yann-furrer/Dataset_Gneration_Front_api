@@ -4,12 +4,10 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
 from database.queries.security import (
-    select_validity_token,
-    check_existing_dev_token,
-    check_session_token,
+   check_session_token, check_existing_dev_token, select_user_id_from_token
 )
 from database.queries.dev_token.dev_token_select import select_token_by_user_id
-from database.queries.security import check_user_suscription_limit
+from database.queries.security import check_user_suscription_limit, select_api_credit_from_token
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 load_dotenv()
@@ -20,6 +18,43 @@ ALGORITHM = os.getenv("ALGORITHM")
 
 router = APIRouter()
 security = HTTPBearer()
+
+
+def core_select_user_id_from_token(api_key: str) -> str:
+    """
+    Retourne le nombre de crédits d'un utilisateur ou retourne une erreur
+    si le token n'est pas reconnu
+    """    
+    user_id: str | bool = select_user_id_from_token(api_key)    
+    print("user_id ee-->",user_id)
+    if user_id is False:
+        print("okokokoko")
+    if user_id is False:
+            print("test paasse")
+            raise HTTPException(
+                status_code=400,
+                detail="Error token not recognized",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        return user_id["userId"]
+
+def core_select_api_credit_from_token(api_key: str) -> int:
+    """
+    Retourne le nombre de crédits d'un utilisateur ou retourne une erreur
+    si le token n'est pas reconnu
+    """
+    nb_credit: int | bool = select_api_credit_from_token(api_key)
+
+    if nb_credit is False:
+            raise HTTPException(
+                status_code=400,
+                detail="Error token not recognized",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    return nb_credit["ApiCredit"]
+
+
 
 
 def get_token_by_user_id(user_id: str) -> bool:
@@ -57,50 +92,50 @@ async def check_dev_token(request: Request) -> bool:
     return bool_response
 
 
-def check_dev_token_validity(token: str, nb_rows_to_generate: int) -> bool:
-    """
-    Vérifie si le token est valide
-    """
-    try:
-        token_info = select_validity_token(token)
-        if token_info is False:
-            raise HTTPException(
-                status_code=401,
-                detail="Token not found or invalid",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        # Une marge de 10% est ajoutée pour ne pas avoir de problème de calcul en la faveur du clientr
-        if (nb_rows_to_generate + token_info["quotaUsed"]) > token_info[
-            "limit"
-        ] * 1.10 and datetime.now() < token_info["expireAt"]:
-            raise HTTPException(
-                status_code=400,
-                detail=" Not enough credit",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+# def check_dev_token_validity(token: str, nb_rows_to_generate: int) -> bool:
+#     """
+#     Vérifie si le token est valide
+#     """
+#     try:
+#         token_info = select_validity_token(token)
+#         if token_info is False:
+#             raise HTTPException(
+#                 status_code=401,
+#                 detail="Token not found or invalid",
+#                 headers={"WWW-Authenticate": "Bearer"},
+#             )
+#         # Une marge de 10% est ajoutée pour ne pas avoir de problème de calcul en la faveur du clientr
+#         if (nb_rows_to_generate + token_info["quotaUsed"]) > token_info[
+#             "limit"
+#         ] * 1.10 and datetime.now() < token_info["expireAt"]:
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail=" Not enough credit",
+#                 headers={"WWW-Authenticate": "Bearer"},
+#             )
 
-        if token_info["expire"] < datetime.now():
-            raise HTTPException(
-                status_code=400,
-                detail=" Token expired",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        elif token["quotaUsed"] >= token_info["limit"]:
-            raise HTTPException(
-                status_code=400,
-                detail=" Not enough credit",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-            return True
+#         if token_info["expire"] < datetime.now():
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail=" Token expired",
+#                 headers={"WWW-Authenticate": "Bearer"},
+#             )
+#         elif token["quotaUsed"] >= token_info["limit"]:
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail=" Not enough credit",
+#                 headers={"WWW-Authenticate": "Bearer"},
+#             )
+#             return True
 
-    except Exception as e:
-        print("error -->", e)
-        raise HTTPException(
-            status_code=401,
-            detail="User subscription not found or invalid",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-        return False
+#     except Exception as e:
+#         print("error -->", e)
+#         raise HTTPException(
+#             status_code=401,
+#             detail="User subscription not found or invalid",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#         return False
 
 
 async def get_session_token(request: Request) -> str:

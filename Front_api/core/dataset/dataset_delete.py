@@ -1,15 +1,13 @@
 import os
 import sys
-import json 
+import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import HTTPException
 from core.checking import check_var_is_none
 
-# dataset 
-from database.queries.dataset import (
-   delete_dataset_by_dataset_id
-)
+# dataset
+from database.queries.dataset import delete_dataset_by_dataset_id
 
 
 # ==============================================================
@@ -22,6 +20,7 @@ from database.queries.dataset import (
 #     et toucher à la fois `DATASET` et `RULESCONFIG`.
 # ==============================================================
 
+
 # delete_dataset_historical
 def core_delete_dataset_by_dataset_id(datasetId: str, userId: str) -> bool:
     """
@@ -31,7 +30,7 @@ def core_delete_dataset_by_dataset_id(datasetId: str, userId: str) -> bool:
     if result_request:
         return True
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while deleting dataset",
             headers={"WWW-Authenticate": "Bearer"},

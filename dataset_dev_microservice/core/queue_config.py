@@ -17,7 +17,7 @@ class TaskSchema(TypedDict):
 
     id: str
     dataset_id_row: str
-    function: int
+    function: str
     dataset_name: str
     client_id: str
     end_format: str = "json"

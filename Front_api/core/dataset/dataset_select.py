@@ -5,11 +5,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from fastapi import HTTPException
 from core.checking import check_var_is_none
 from utils.s3_handle import S3Manager
+
 # dataset et s3
 from database.queries.dataset import (
     select_dataset_historical_offset,
     select_all_s3_url_from_dataset,
-    select_dataset_name_system_with_dataset_id
+    select_dataset_name_system_with_dataset_id,
 )
 
 
@@ -20,7 +21,7 @@ from database.queries.dataset import (
     select_dataset_config_name_by_user_id,
     select_yaml_content_by_dataset_config_id,
     select_dataset_config_by_dataset_id,
-    select_dataset_historical_config_offset
+    select_dataset_historical_config_offset,
 )
 
 # ==============================================================
@@ -59,12 +60,11 @@ def get_type_and_name_from_yaml_content(
     return type_dict
 
 
-
-#select_yaml_content_dataset_config_name
+# select_yaml_content_dataset_config_name
 def core_select_yaml_content_by_dataset_config_id(datasetId: str, userId: str) -> dict:
-    
+
     check_var_is_none(datasetId, userId)
-   
+
     result_request = select_yaml_content_by_dataset_config_id(datasetId, userId)
     # print("result_request -->", result_request)
     if result_request is not None:
@@ -76,16 +76,15 @@ def core_select_yaml_content_by_dataset_config_id(datasetId: str, userId: str) -
         return type_dict
 
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
-
 def core_select_dataset_config_by_dataset_id(datasetId: str, userId: str) -> dict:
-    
+
     check_var_is_none(datasetId, userId)
     result_request = select_dataset_config_by_dataset_id(datasetId, userId)
     if result_request is not None:
@@ -97,14 +96,14 @@ def core_select_dataset_config_by_dataset_id(datasetId: str, userId: str) -> dic
         return type_dict
 
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
-#get_dataset_config_name_by_user_id
+# get_dataset_config_name_by_user_id
 def core_select_dataset_config_name_by_user_id(userId: str) -> list[dict]:
     result_request: dict[tuple] = select_dataset_config_name_by_user_id(userId)
 
@@ -114,13 +113,14 @@ def core_select_dataset_config_name_by_user_id(userId: str) -> list[dict]:
         ]
         return data_dict
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config name by user id",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-#get_dataset_config_info
+
+# get_dataset_config_info
 def core_select_dataset_config(datasetId: str, userId: str) -> dict:
     """
     Get dataset config
@@ -130,16 +130,17 @@ def core_select_dataset_config(datasetId: str, userId: str) -> dict:
     if result_request is not None:
         return result_request
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
-
-#select_dataset_config_and_rules_config
-def core_select_yaml_and_rules_content_by_dataset_config_id(datasetId: str, userId: str) -> dict:
+# select_dataset_config_and_rules_config
+def core_select_yaml_and_rules_content_by_dataset_config_id(
+    datasetId: str, userId: str
+) -> dict:
     result_request = select_yaml_and_rules_content_by_dataset_config_id(
         datasetId, userId
     )
@@ -148,14 +149,15 @@ def core_select_yaml_and_rules_content_by_dataset_config_id(datasetId: str, user
         or result_request is None
         or result_request["yamlContent"] == []
     ):
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting dataset config or rules config",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return result_request
 
-#get_dataset_config_historical_offset
+
+# get_dataset_config_historical_offset
 def core_select_dataset_historical_config_offset(userId: str, offset: int) -> dict:
     """
     Get dataset config
@@ -178,7 +180,7 @@ def core_select_dataset_historical_config_offset(userId: str, offset: int) -> di
         return data_dict
 
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail=f"Error while getting dataset config maybe offset is too high {offset}",
             headers={"WWW-Authenticate": "Bearer"},
@@ -196,15 +198,11 @@ def core_select_dataset_historical_config_offset(userId: str, offset: int) -> di
 # ==============================================================
 
 
-
-
-
-
-
 # déclaration de la classe S3Manager
 s3_manager = S3Manager()
 
-#select_all_s3_url_dataset
+
+# select_all_s3_url_dataset
 def core_select_all_s3_url_from_dataset(ownerId: str) -> dict:
     """
     Get S3 url
@@ -223,32 +221,32 @@ def core_select_all_s3_url_from_dataset(ownerId: str) -> dict:
 
         return data_dict
     else:
-        HTTPException(
+        raise HTTPException(
             status_code=400,
             detail="Error while getting S3 url datasetId not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
-#select_dataset_for_historical
+# select_dataset_for_historical
 def core_select_dataset_historical_offset(userId: str, offset: int) -> dict:
     result_request = select_dataset_historical_offset(userId, offset)
     if result_request is False:
-         data_dict = [
-        {
-            "id": "vide",
-            "nbRows": "vide",
-            "datasetConfigId": "vide",
-            "clientId": "vide",
-            "campaignId": "vide",
-            "status": "vide",
-            "FinishedAt": "vide",
-            "TimeToGenerate": "vide",
-            "datasetName": "vide",
-            "datasetNameSystem": "vide",
-        }
-    ]
-        
+        data_dict = [
+            {
+                "id": "vide",
+                "nbRows": "vide",
+                "datasetConfigId": "vide",
+                "clientId": "vide",
+                "campaignId": "vide",
+                "status": "vide",
+                "FinishedAt": "vide",
+                "TimeToGenerate": "vide",
+                "datasetName": "vide",
+                "datasetNameSystem": "vide",
+            }
+        ]
+
     data_dict = [
         {
             "id": item[0],
@@ -265,7 +263,9 @@ def core_select_dataset_historical_offset(userId: str, offset: int) -> dict:
         for item in result_request
     ]
     return data_dict
-#select_dataset_name_system_with_dataset_id_core
+
+
+# select_dataset_name_system_with_dataset_id_core
 def core_select_dataset_name_system_with_dataset_id(datasetId: str, userId: str) -> str:
     response_request = select_dataset_name_system_with_dataset_id(datasetId, userId)
     if not response_request:
@@ -276,4 +276,3 @@ def core_select_dataset_name_system_with_dataset_id(datasetId: str, userId: str)
         )
     else:
         return response_request[0]
-
