@@ -274,5 +274,5 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
         return error_list
 
 
-data = yaml.safe_load(open("/Users/yann/Documents/GitHub/Dataset_Gneration_Front_api/fields.yaml", "r"))
-print(check_yaml_is_valid(data))
+# data = yaml.safe_load(open("/Users/yann/Documents/GitHub/Dataset_Gneration_Front_api/fields.yaml", "r"))
+# print(check_yaml_is_valid(data))
