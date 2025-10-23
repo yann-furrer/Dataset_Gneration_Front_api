@@ -51,7 +51,7 @@ async def get_dataset_docs():
 async def get_dataset_config_docs():
     """Page Swagger UI spéciale avec seulement certaines routes"""
     return get_swagger_ui_html(
-        openapi_url="/openapi-dataset-config-api", title="Documentation REST simplifiée"
+        openapi_url="/openapi-dataset-config-api.json", title="Documentation REST simplifiée"
     )
 
 
