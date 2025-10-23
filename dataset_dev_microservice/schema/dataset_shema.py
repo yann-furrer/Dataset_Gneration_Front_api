@@ -51,6 +51,8 @@ class GenerateDatasetRequest(BaseModel):
 class GenerateDatasetResponse(BaseModel):
     message: str
     process_id: str
+    nb_credit_used : int
+    nb_credit_remaining : int
 
 
 class CheckYamlRequest(BaseModel):

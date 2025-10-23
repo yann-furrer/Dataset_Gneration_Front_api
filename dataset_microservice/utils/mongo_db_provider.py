@@ -169,7 +169,16 @@ class MongoDBManager:
             return 0
     
     # ======================== FONCTIONS DE RECHERCHE ========================
-
+    def get_faker_name_list_by_client(self, client_id :str)-> List[Dict[str, Any]]:
+        """
+        Retourne la liste des noms de données faker
+        """
+        try: 
+            collection = self.get_collection()
+            collection.distinct("faker_type_name", {"client_id": client_id})
+            return list(collection.distinct("faker_type_name", "faker_type_id", {"client_id": client_id}))
+        except PyMongoError as e:
+            print(f"❌ Erreur lors de la recherche: {e}")
 
     def get_grouped_faker_types_by_client(
         self,
@@ -231,7 +240,7 @@ class MongoDBManager:
             print(f"❌ Erreur lors de l’agrégation groupée: {e}")
             return []
     
-    def find_one(self, filter_dict: Dict[str, Any] = None, collection_name: str = None) -> Optional[Dict]:
+    def find_one(self, filter_dict: Dict[str, Any] = None, collection_name: str = None, projection  : Dict[str, Any] = None) -> Optional[Dict]:
         """
         Trouve un document
         
@@ -245,7 +254,9 @@ class MongoDBManager:
         try:
             collection = self.get_collection(collection_name)
             filter_dict = filter_dict or {}
-            return collection.find_one(filter_dict)
+            if projection is None:
+                projection = {}
+            return collection.find_one(filter_dict, projection)
         except PyMongoError as e:
             print(f"❌ Erreur lors de la recherche: {e}")
             return None
@@ -338,7 +349,7 @@ class MongoDBManager:
          return self.update_one(filter_query, update_query)
     
 # ======================== FONCTION COMPTE ========================
-    def count_documents(filter_dict: Dict[str, Any] = None, collection_name: str = None) -> int:
+    def count_documents(self, filter_dict: Dict[str, Any] = None, collection_name: str = None) -> int:
         """
         Compte les documents selon un filtre
         

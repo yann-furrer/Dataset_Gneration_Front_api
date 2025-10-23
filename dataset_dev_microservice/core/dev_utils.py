@@ -45,7 +45,7 @@ def check_fakertype_is_valid(fakerType : str) -> bool:
 
 
 
-def parsing_value(yaml_content : str, number_list : list, date_list : list) -> bool:
+def parsing_value(yaml_content : str, number_list : list, date_list : list, end_format: str) -> bool:
     error_list = []
     for variable in yaml_content.get("fields", []):
         field_name = variable.get("fieldName", "<inconnu>")
@@ -54,10 +54,10 @@ def parsing_value(yaml_content : str, number_list : list, date_list : list) -> b
 
         # 3. Si c'est un type composite, lancer la récursion
         if var_type in ("array", "object"):
-            temp_error_list = check_rules_is_valid(variable, var_type, number_list, date_list)
+            temp_error_list = check_rules_is_valid(variable, var_type, number_list, date_list, end_format)
             if temp_error_list != []:
                 error_list.extend(temp_error_list)
-            parsing_value(variable, number_list, date_list)
+            parsing_value(variable, number_list, date_list, end_format)
         # 1. Vérifie si un fakerType est défini
         if faker_type:
             if not check_fakertype_is_valid(faker_type):
@@ -67,20 +67,26 @@ def parsing_value(yaml_content : str, number_list : list, date_list : list) -> b
         
         # 2. Sinon on vérifie le type
         else:
-            temp_error_list = check_rules_is_valid(variable, var_type, number_list, date_list)
+            temp_error_list = check_rules_is_valid(variable, var_type, number_list, date_list, end_format)
             if temp_error_list != []:
                 error_list.extend(temp_error_list)
 
     return error_list
 
 
-def check_yaml_is_valid(yaml_content : dict) -> list:
+def check_yaml_is_valid(yaml_content : dict, user_id : str = "", end_format: str = "") -> list:
     """
     Parse le yaml et vérifie si tous les champs types sont valides
     retourne la liste des erreurs trouvées
+    isvalid : bool
+    error : list
     """
     number_list, date_list = list_variables_type(yaml_content)
-    error_list : list = parsing_value(yaml_content, number_list, date_list)
+    errors = parsing_value(yaml_content, number_list, date_list, end_format)
+    isvalid = True
+    if errors != []:
+        isvalid = False
+    error_list : dict = { "isvalid" : isvalid, "error" : errors}
 
 
     return error_list
@@ -94,7 +100,7 @@ def check_yaml_is_valid(yaml_content : dict) -> list:
 
 
 
-def check_rules_is_valid(rules : dict, type_config : str, number_list : list, date_list : list) -> list:
+def check_rules_is_valid(rules : dict, type_config : str, number_list : list, date_list : list, end_format: str) -> list:
         """
         Vérifie si les règles sont valides
         """
@@ -152,7 +158,7 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
                 if rule not in ("fieldName", "type", "rules"):
                     error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide.")
                 if rule == "rules":
-                    if rules.get("rules") !=  None:
+                    if rules.get("rules") is not  None:
                         for elem in rules.get("rules").get("range"):
                             
                             if elem == "probability":
@@ -245,6 +251,8 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
                             else:
                                 error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'allowedValues' : {rules.get('allowedValues')} n'est pas valide il doit être un nombre ou un float.")
         if type_config in ("array"):
+                if end_format == "csv":
+                    error_list.append(f"Dans le champ '{rules.get('fieldName')} n'est pas valide les csv ne supportent pas les tableaux")
                 for rule in rules:
                     if rule not in ("fieldName", "type", "count", "fields", "rules"):
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide.")
@@ -255,6 +263,8 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
                             if elem != "count":
                                 error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ {elem} n'est pas valide et n'existe pas dans la liste des règles.")
         if type_config in ("object"):
+                if end_format == "csv":
+                    error_list.append(f"Dans le champ '{rules.get('fieldName')}', n'est pas valide les csv ne supportent pas les objets")
                 for rule in rules:
                     if rule not in ("fieldName", "type", "fields"):
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide.")
@@ -264,6 +274,5 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
         return error_list
 
 
-# data = yaml.safe_load(open("/Users/yann/Documents/GitHub/Dataset_Gneration_Front_api/fields.yaml", "r"))
-# print(check_yaml_is_valid(data))
-# print(data)
+data = yaml.safe_load(open("/Users/yann/Documents/GitHub/Dataset_Gneration_Front_api/fields.yaml", "r"))
+print(check_yaml_is_valid(data))

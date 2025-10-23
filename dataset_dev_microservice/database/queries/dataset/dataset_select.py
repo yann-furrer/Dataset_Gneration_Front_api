@@ -17,13 +17,13 @@ from config import text, session
 
 
     
-SELECT_ALL_S3_URL_DATASET = """
-SELECT "s3Url", "id", "campaignId" FROM public."Dataset" WHERE "ownerId" = :ownerId AND "s3Url" IS NOT NULL;
+SELECT_ALL_DATASET_BY_USER = """
+SELECT "datasetName", "datasetNameSystem", "nbRows", "datasetConfigId", "createdAt" FROM public."Dataset" WHERE "ownerId" = :ownerId AND "status" = 'success';
 """
-def select_all_s3_url_from_dataset(user_id: str) -> dict:
+def select_all_s3_url_from_dataset(user_id: str) -> dict | None:
     try:
-        request = session.execute(text(SELECT_ALL_S3_URL_DATASET), {"ownerId": user_id})
-        result = request.fetchall()
+        request = session.execute(text(SELECT_ALL_DATASET_BY_USER), {"ownerId": user_id})
+        result = request.mappings().all()
         return result
     except Exception as e:
         print("Error while selecting all s3Url from dataset with this user", e)
@@ -41,7 +41,7 @@ SELECT "s3Url", "id", "campaignId" FROM public."Dataset" WHERE "ownerId" = :owne
 def select_all_s3_url_by_campaign_from_dataset(compaign_id: str, user_id: str) -> tuple:
     try:
         request = session.execute(
-            text(SELECT_ALL_S3_URL_DATASET),
+            text(SELECT_ALL_DATASET_BY_USER),
             {"compaignId": compaign_id, "ownerId": user_id},
         )
         result = request.fetchone()

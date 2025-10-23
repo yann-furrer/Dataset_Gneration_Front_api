@@ -5,7 +5,7 @@ from core.s3_handle import S3Manager
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 # dataset et s3
-from database.queries.dataset import (
+from database.queries.dataset.dataset_select import (
     select_all_s3_url_from_dataset,
     select_dataset_config,
     select_dataset_historical_offset,
@@ -33,30 +33,20 @@ from database.queries.dataset.dataset_select import (
 s3_manager = S3Manager()
 
 
-def select_all_s3_url_dataset(ownerId: str) -> dict:
+def core_select_all_s3_url_from_dataset(ownerId: str) -> dict:
     """
     Get S3 url
     """
     result_request = select_all_s3_url_from_dataset(ownerId)
-    if result_request is not None:
-        data_dict = [
-            {
-                "url_presigned": s3_manager.generate_presigned_urls(item[0]),
-                "id": item[1],
-                "campaignId": item[2],
-            }
-            for item in result_request
-        ]
-        s3_manager.generate_presigned_urls()
 
-        return data_dict
-    else:
+    if result_request is None:
         raise HTTPException(
             status_code=400,
             detail="Error while getting S3 url datasetId not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
+    
+    return result_request
 
 # ==============================================================
 # 🚦 ROUTES LIÉES UNIQUEMENT À LA TABLE `DATASET`
@@ -127,22 +117,9 @@ def core_select_dataset_historical_config_offset(userId: str, offset: int) -> di
     Get dataset config
     """
     result_request = select_dataset_historical_config_offset(userId, offset)
-    if result_request is not None:
-        data_dict = [
-            {
-                "datasetId": item[0],
-                "yamlName": item[1],
-                "draftResult": item[2],
-                "rulesId": item[3],
-                "nbRows": item[4],
-                "campaignId": item[5],
-                "createdAt": item[6],
-            }
-            for item in result_request
-        ]
-        return data_dict
+    
 
-    else:
+    if result_request is False:
         raise HTTPException(
             status_code=400,
             detail=f"Error while getting dataset config maybe offset is too high {offset}",

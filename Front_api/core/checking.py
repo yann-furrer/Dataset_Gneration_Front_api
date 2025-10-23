@@ -2,7 +2,7 @@ import os , sys, uuid
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
-from database.queries.security import check_session_token, check_user_suscription_limit
+from database.queries.security import check_session_token, check_user_suscription_limit, select_user_id_from_token
 from database.queries.dev_api import select_dev_token_info
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
@@ -14,6 +14,26 @@ ALGORITHM = os.getenv("ALGORITHM")
 
 router = APIRouter()
 security = HTTPBearer()  
+
+
+#fonction pour lire les clés api et ressortitr le user
+def core_select_user_id_from_api_key(api_key: str) -> str:
+    """
+    Retourne le nombre de crédits d'un utilisateur ou retourne une erreur
+    si le token n'est pas reconnu
+    """
+    user_id: str | bool = select_user_id_from_token(api_key)
+    if user_id is False:
+        raise HTTPException(
+            status_code=400,
+            detail="Error Api keys not recognized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    else:
+        return user_id["userId"]
+
+
+
 
 #  Function to generate a JWT token
 def generate_user_api_token() -> str:

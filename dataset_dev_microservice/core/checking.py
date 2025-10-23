@@ -1,13 +1,18 @@
 import os, sys, uuid
 from datetime import datetime
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Query
 from fastapi.security import HTTPBearer
 from database.queries.security import (
-   check_session_token, check_existing_dev_token, select_user_id_from_token
+    check_session_token,
+    check_existing_dev_token,
+    select_user_id_from_token,
 )
 from database.queries.dev_token.dev_token_select import select_token_by_user_id
-from database.queries.security import check_user_suscription_limit, select_api_credit_from_token
+from database.queries.security import (
+    check_user_suscription_limit,
+    select_api_credit_from_token,
+)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 load_dotenv()
@@ -20,24 +25,35 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-def core_select_user_id_from_token(api_key: str) -> str:
+def core_check_server_token(server_token: str = Query(...)) -> bool:
+    """
+    Vérifie si le token est valide
+    """
+    if server_token == os.getenv("SERVER_TOKEN"):
+        return True
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail="Server token not found or invalid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def core_select_user_id_from_api_key(api_key: str) -> str:
     """
     Retourne le nombre de crédits d'un utilisateur ou retourne une erreur
     si le token n'est pas reconnu
-    """    
-    user_id: str | bool = select_user_id_from_token(api_key)    
-    print("user_id ee-->",user_id)
+    """
+    user_id: str | bool = select_user_id_from_token(api_key)
     if user_id is False:
-        print("okokokoko")
-    if user_id is False:
-            print("test paasse")
-            raise HTTPException(
-                status_code=400,
-                detail="Error token not recognized",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+        raise HTTPException(
+            status_code=400,
+            detail="Error Api keys not recognized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     else:
         return user_id["userId"]
+
 
 def core_select_api_credit_from_token(api_key: str) -> int:
     """
@@ -47,14 +63,12 @@ def core_select_api_credit_from_token(api_key: str) -> int:
     nb_credit: int | bool = select_api_credit_from_token(api_key)
 
     if nb_credit is False:
-            raise HTTPException(
-                status_code=400,
-                detail="Error token not recognized",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+        raise HTTPException(
+            status_code=400,
+            detail="Error token not recognized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return nb_credit["ApiCredit"]
-
-
 
 
 def get_token_by_user_id(user_id: str) -> bool:
@@ -70,7 +84,7 @@ def get_token_by_user_id(user_id: str) -> bool:
                 detail="Le token de dev n'est pas reconnu",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         return token
     except Exception as e:
         print("error -->", e)
@@ -89,7 +103,7 @@ async def check_dev_token(request: Request) -> bool:
             detail="Le token de dev n'est pas reconnu",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return bool_response
+    return bool
 
 
 # def check_dev_token_validity(token: str, nb_rows_to_generate: int) -> bool:

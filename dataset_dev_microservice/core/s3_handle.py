@@ -41,7 +41,8 @@ class S3Manager:
     def generate_presigned_url(self, client_id, file_name, expiration=900)-> str:
         """Génère une URL pré-signée pour qu'un utilisateur télécharge son fichier."""
         object_key = f"{client_id}/{file_name}"
-        
+        print("object_key -->", object_key)
+        print("self.bucket_name -->", self.bucket_name)
         try:
             url = self.s3_client.generate_presigned_url(
                 'get_object',

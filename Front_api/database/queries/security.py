@@ -6,7 +6,26 @@ from config import session, text
 
 
 
-
+# Récupère le user id d'un token
+SELECT_USER_ID_FROM_TOKEN = """
+SELECT "userId" FROM public."APIHandle" WHERE "token" = :token;
+"""
+def select_user_id_from_token(token) -> str | bool :
+    """
+    Récupère le user id d'un token
+    """
+    try:
+        result = session.execute(text(SELECT_USER_ID_FROM_TOKEN), {"token": token})
+        row = result.mappings().first()
+        if row is None:
+            return False
+        return row
+    except Exception as error:
+         session.rollback()
+         print("error -->",error)
+         return False
+    
+    
 
 #Check if sessions token is valid
 

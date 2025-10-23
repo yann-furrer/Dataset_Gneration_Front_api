@@ -97,6 +97,7 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
         """
         Insère un type faker dans la base de données MongoDB.
         """
+    #Probllème régler les catégories c'est l'objet qui est poussé pas le nom
         if faker_category == None:
             print("faker listr : ", faker_list)
             faker_category = await self.make_api_call(prompt=f" nom de la methode : {faker_type_name} et des exmeple de valeur : {(faker_list or [])[:2]} ",
@@ -106,14 +107,14 @@ class FakerHandler(MongoDBManager, ChatGPTAsyncClient):
             
             
        
-        # faker_category = json.loads(faker_category)
+        faker_category = json.loads(faker_category)
         faker_type_id = str(uuid.uuid4().hex[:12] )
         if not faker_type_name and not faker_type_id and not faker_list and not client_id and not faker_category:
             raise ValueError("Nom, ID et valeurs requises pour l'insertion.")
         # Implémentation de l'insertion dans la base de données MongoDB
         response : bool = self.add_one({"faker_type_name": faker_type_name, "client_id": client_id, 
                 "faker_type_id": faker_type_id, "description": "No description",
-                "category": faker_category, "list": faker_list})
+                "category": faker_category["category"], "list": faker_list})
         
         return [response, faker_type_id]
 

@@ -25,6 +25,8 @@ class TaskSchema(TypedDict):
     faker_name_list : Optional[list]
     rules: Optional[dict]
     request_type: Optional[str]
+    dev: Optional[bool] = False,
+    dev_process_id: Optional[str] = None,
 
 # Utilisation
 task: TaskSchema = {

@@ -39,7 +39,6 @@ def select_user_id_from_token(token) -> str | bool :
     try:
         result = session.execute(text(SELECT_USER_ID_FROM_TOKEN), {"token": token})
         row = result.mappings().first()
-        print("row -->", row)
         if row is None:
             return False
         return row

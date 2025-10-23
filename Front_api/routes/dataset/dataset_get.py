@@ -5,7 +5,7 @@ import sys
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBearer
 from dotenv import load_dotenv
-from core.checking import get_session_token
+from core.checking import get_session_token, core_select_user_id_from_api_key
 from utils.s3_handle import S3Manager
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
@@ -120,10 +120,21 @@ async def get_dataset_config_historical(
 async def get_yaml_content_by_dataset_config_id(
     datasetId: str, userId: str = Depends(get_session_token)
 ):
+    
     response = core_select_yaml_content_by_dataset_config_id(datasetId, userId)
     print(response)
     return JSONResponse(response)
 
+
+# même route mais pour les clés api (dev)
+@router.get("/dev/rules/get_yaml_content_by_dataset_config_id")
+async def dev_get_yaml_content_by_dataset_config_id(
+    datasetId: str, api_key: str):
+    user_id =  core_select_user_id_from_api_key(api_key)
+
+    response = core_select_yaml_content_by_dataset_config_id(datasetId, user_id)
+    print(response)
+    return JSONResponse(response)
 
 @router.get("/rules/get_yaml_content_by_dataset_id")
 async def get_dataset_config_by_dataset_id(
