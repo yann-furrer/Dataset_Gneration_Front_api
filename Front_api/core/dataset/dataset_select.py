@@ -244,9 +244,10 @@ def core_select_dataset_historical_offset(userId: str, offset: int) -> dict:
                 "TimeToGenerate": "vide",
                 "datasetName": "vide",
                 "datasetNameSystem": "vide",
+                "isApi": "vide",
             }
         ]
-
+    print("data_dict -->", result_request)
     data_dict = [
         {
             "id": item[0],
@@ -259,6 +260,7 @@ def core_select_dataset_historical_offset(userId: str, offset: int) -> dict:
             "TimeToGenerate": item[7],
             "datasetName": item[8],
             "datasetNameSystem": item[9],
+            "isApi": item[10],
         }
         for item in result_request
     ]

@@ -25,7 +25,7 @@ def delete_rules_config_by_rules_id(rules_id: str, user_id: str) -> bool:
         session.commit()
         if result.rowcount < 1:
             raise HTTPException(
-                status_code=400,
+                status_code=404,
                 detail="Error while deleting rules config, maybe the rules_id is not exist",
                 headers={"WWW-Authenticate": "Bearer"},
             )
@@ -34,7 +34,7 @@ def delete_rules_config_by_rules_id(rules_id: str, user_id: str) -> bool:
         session.rollback()
         print("Error while deleting rules config", e)
         raise   HTTPException(
-            status_code=400,
+            status_code=404,
             detail="Error while deleting rules config",
             headers={"WWW-Authenticate": "Bearer"},
         )

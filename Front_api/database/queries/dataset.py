@@ -98,7 +98,7 @@ def select_all_s3_url_by_campaign_from_dataset(compaignId: str, userId: str) -> 
     
 
 SELECT_DATASET_HISTORICAL_OFFSET = """
-SELECT "id", "nbRows", "datasetConfigId","ownerId", "campaignId", "status", "FinishedAt", "TimeToGenerate" , "datasetName", "datasetNameSystem"
+SELECT "id", "nbRows", "datasetConfigId","ownerId", "campaignId", "status", "FinishedAt", "TimeToGenerate" , "datasetName", "datasetNameSystem", "IsApi"
 FROM public."Dataset"
 WHERE "ownerId" = :ownerId
 ORDER BY "FinishedAt" DESC

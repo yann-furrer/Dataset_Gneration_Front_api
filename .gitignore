@@ -11,6 +11,7 @@ dataset_dev_microservice/database/queries/dev_token/__pycache__/
 dataset_dev_microservice/core/__pycache__/
 dataset_dev_microservice/core/dev_token/__pycache__/
 dataset_dev_microservice/core/dataset/__pycache__/
+dataset_dev_microservice/core/rules_config/__pycache__
 dataset_dev_microservice/routes/dataset/__pycache__/
 dataset_dev_microservice/routes/dataset_config/__pycache__/
 dataset_dev_microservice/routes/dev_token/__pycache__/
@@ -44,3 +45,5 @@ dataset_dev_microservice/schema/__pycache__/dataset_shema.cpython-312.pyc
 dataset_dev_microservice/routes/dataset.py
 .gitignore
 .DS_Store
+dataset_dev_microservice/core/rules_config/__pycache__/rules_config_delete.cpython-312.pyc
+dataset_dev_microservice/database/queries/rules_config/__pycache__/rules_config_delete.cpython-312.pyc

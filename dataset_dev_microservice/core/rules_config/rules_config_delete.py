@@ -22,7 +22,7 @@ def core_delete_rules_config_by_rules_id(rules_id: str, api_key: str) -> bool:
         return True
     else:
         raise HTTPException(
-            status_code=400,
+            status_code=404,
             detail="Error while deleting rules config",
             headers={"WWW-Authenticate": "Bearer"},
         )

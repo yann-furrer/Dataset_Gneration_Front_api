@@ -97,7 +97,7 @@ async def get_openapi_rules():
         description="Cette Api permet d'interrragir avec les services de règles pour la génération de datasets, la liste des routes est donc utilisable via un token généré sur le site syntetica.net",
     )
     # Filtre les routes voulues (ici: /special1 et /special2)
-    allowed_routes = {"/dev/delete_rules_config", "/dev/get_all_rules_data"}
+    allowed_routes = {"/dev/delete_rules_config", "/dev/get_all_rules_data", "/dev/create_rules_config"}
     full_schema["paths"] = {
         path: schema
         for path, schema in full_schema["paths"].items()
