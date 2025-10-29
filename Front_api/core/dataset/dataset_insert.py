@@ -85,14 +85,7 @@ def core_insert_dataset_config(
             campaign_id,
         )
 
-    if result_request_dataset_config and result_rules_config:
-        return True
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Error while inserting dataset config or dataset rules config , try again your yaml is not saved, maybe duplicate datasetId",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+ 
 
 
 # ==============================================================

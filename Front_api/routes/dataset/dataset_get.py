@@ -158,7 +158,7 @@ async def get_config_info(datasetId: str, userId: str = Depends(get_session_toke
     """
     Get dataset config
     """
-    if datasetId == None:
+    if datasetId is None:
         raise HTTPException(
             status_code=400,
             detail="Missing required fields in the request body",

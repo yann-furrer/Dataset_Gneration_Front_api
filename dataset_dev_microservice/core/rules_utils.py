@@ -66,7 +66,7 @@ class RulesUtils:
 
     def get_dataset_config_variables(self) -> dict:
         response = requests.get(
-            f"{API_URL}/dev/rules/get_yaml_content_by_dataset_config_id?datasetId={self.dataset_config_id}&api_key={self.api_key}"
+            f"{API_URL}/dev/rules/get_yaml_content_by_dataset_config_id?datasetId={self.dataset_config_id}&api_key={self.api_key}", timeout=4
         )
         if response.status_code == 200:
             return response.json()
@@ -77,7 +77,6 @@ class RulesUtils:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        print(response.json())
 
     def load_specified_faker(self):
         pass
@@ -86,14 +85,14 @@ class RulesUtils:
         pass
 
     def check_rules(self)-> list:
-        # variables_dict : dict = self.get_dataset_config_variables()
-        variables_dict = {
-            "join_2": "id",
-            "join_3bis": "object",
-            "salaire": "integer",
-            "email": "email",
-            "taille": "integer",
-        }
+        variables_dict : dict = self.get_dataset_config_variables()
+        # variables_dict = {
+        #     "join_2": "id",
+        #     "join_3bis": "object",
+        #     "salaire": "integer",
+        #     "email": "email",
+        #     "taille": "integer",
+        # }
         variables_name_list: list = list(variables_dict.keys())
         data = self.rules_content
         operator_list = {
@@ -127,10 +126,14 @@ class RulesUtils:
         }
         
         temp_error_dict = []
+        print("data", len(data))
         for condition in data:
+            print("rules -->", condition)
             # print("fds",data[0], "\n")
             # Gère le cas ou une occurrence est manquante
-            if data[0].get("occurrences") < 1:
+            if data[0].get("occurrences", None) is None:
+                temp_error_dict.append({"occurences": "must be defined"})
+            if data[0].get("occurrences") is not None and data[0].get("occurrences") < 10:
                 temp_error_dict.append({"occurences": "must be greater than 10"})
             # Gère le cas ou il n'y a pas de condition dans le all
             elif len(condition["conditions"].get("all", [])) < 1:
@@ -148,25 +151,27 @@ class RulesUtils:
                     variable_type: str = variables_dict.get(
                         condition_list[0].get("name"), "error"
                     )
+                    print("-->", variables_dict.get(variable_name, "Error"))
                     # Veriffie si la varibale existe dans le dataset config et le rules
                     if variable_name not in variables_name_list:
                         temp_error_dict.append(
-                            f"must be a valid variable {elem.get('name')}"
+                           {"variable_name": f"must be a valid variable {elem.get('name')}"}
                         )
                     # Vérification du type
-                    if variables_dict.get(variable_name, "Error") in (
+
+                    if variables_dict.get(variable_name, "Error") not in (
                         "integer",
                         "float",
                         "string",
                         "id",
                         "bool",
-                    ) and variables_dict.get(variable_name, "Error") not in (
+                    ) and variables_dict.get(variable_name, "Error") in (
                         "array",
                         "object",
                     ):
                         temp_error_dict.append(
                             {
-                                "operator": f"le type de la variable n'est pas valide {variable_type}"
+                                "type": f"le type de la variable n'est pas valide {variable_type}"
                             }
                         )
                     # Vérification de l'opérateur

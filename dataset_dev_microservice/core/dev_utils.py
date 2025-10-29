@@ -174,13 +174,13 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
 
         if type_config in ("date"):
             for rule in rules:
-                if rule not in ("fieldName", "type", "rules"):
+                if rule not in ("fieldName", "type", "rules", "format"):
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide.")
                 elif rule == "rules":
                     rules_values = rules.get("rules")
                     if any(char.isalpha() for char in rules_values.get("range").get("start")) and any(char.isalpha() for char in rules_values.get("range").get("end")):
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'range' : {rules.get('range')} n'est pas valide, il ne doit pas contenir de lettre.")
-                    if rules_values.get("series") != None:
+                    if rules_values.get("series") is not None:
                         if rules_values.get("series") not in ["days", "months", "years", "hours", "minutes"]:
                             error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'series' : {rules.get('series')} n'est pas valide il ne peut être 'days', 'months', 'years', 'hours' ou 'minutes'.")
                     
@@ -195,6 +195,8 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
 
         if type_config in ("id"):
                 for rule in rules:
+                    print(" pattern_part_of_dataset -->", rules.get("pattern_part_of_dataset"), type(rules.get("pattern_part_of_dataset")))
+
                     if rule not in ("fieldName", "type", "rules", "includeLetters", "includeNumbers", "includeSpecialChars", "start_by", "pattern", "pattern_max_cycle", "pattern_part_of_dataset"):
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ '{rule}' n'est pas valide.")
                    
@@ -210,22 +212,19 @@ def check_rules_is_valid(rules : dict, type_config : str, number_list : list, da
                     elif rule == "start_by" and isinstance(rules.get("includeLetters"), str):
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'start_by' : {rules.get('start_by')} n'est pas valide il doit être une string.")
                    
-                    elif rule == "pattern" and isinstance(rules.get("pattern"), str):
+                    elif rule == "pattern" and rules.get("pattern") != "type":
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern' : {rules.get('pattern')} n'est pas valide il doit être égale à 'type'.")
                    
-                    elif rule == "pattern_max_cycle" and isinstance(rules.get("pattern_max_cycle"), (int, float)):
+                    elif rule == "pattern_max_cycle" and isinstance(rules.get("pattern_max_cycle"), (int, float)) is False:
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern_max_cycle' : {rules.get('pattern_max_cycle')} n'est pas valide il doit être un nombre entier.")
                    
-                    elif rule == "pattern_part_of_dataset" and isinstance(rules.get("pattern_part_of_dataset"), (int, float)):
-                        error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern_part_of_dataset' : {rules.get('pattern_part_of_dataset')} n'est pas valide il doit être un nombre entre 0 et 1.")
+                    elif rule == "pattern_part_of_dataset" and isinstance(rules.get("pattern_part_of_dataset"), (int, float)) is False:
+                        error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern_part_of_dataset' : {rules.get('pattern_part_of_dataset')} n'est pas valide il doit être un nombre entier.")
         
-                    elif rule == "pattern_part_of_dataset" and isinstance(rules.get("pattern_part_of_dataset"), (int, float)) and 0 > rules.get("pattern_part_of_dataset") <= 1:
+                    elif rule == "pattern_part_of_dataset" and isinstance(rules.get("pattern_part_of_dataset"), (int, float)) and 0 < rules.get("pattern_part_of_dataset") >= 1:
                         error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern_part_of_dataset' : {rules.get('pattern_part_of_dataset')} n'est pas valide il doit être un nombre entre 0 et 1.")
                     
-                    elif rule == "pattern_max_cycle" and isinstance(rules.get("pattern_max_cycle"), (int, float)):
-                        error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern_max_cycle' : {rules.get('pattern_max_cycle')} n'est pas valide il doit être un nombre entier.")
-                    
-                    elif rule == "pattern_max_cycle" and isinstance(rules.get("pattern_max_cycle"), (int, float)) and 0 > rules.get("pattern_max_cycle") <50 :
+                    elif rule == "pattern_max_cycle" and isinstance(rules.get("pattern_max_cycle"), (int, float)) and 0 < rules.get("pattern_max_cycle") > 50 :
                             error_list.append(f"Dans le champ '{rules.get('fieldName')}', le champ 'pattern_max_cycle' : {rules.get('pattern_max_cycle')} n'est pas valide il doit être un nombre entre 0 et 50.")
                     
 

@@ -47,7 +47,7 @@ security = HTTPBearer()
 async def create_rules_config(
     request: Request,
     api_key: str,
-    rules_content: dict = Body(..., description="Contenu YAML converti en objet JSON"),
+    rules_content: list = Body(..., description="Contenu YAML converti en objet JSON"),
     dataset_config_id: str = Body(..., description="Identifiant de la configuration de dataset"),
 ) -> dict:
     body = await request.json()
@@ -58,11 +58,17 @@ async def create_rules_config(
     rules_id = str(uuid.uuid4().hex) if body.get("rules_id", None) is None else body.get("rules_id")
     rules_utils = RulesUtils(rules_content, rules_id, dataset_config_id, api_key)
 
-    rules_check : list = rules_utils.check_rules(rules_content)
+    rules_check : list = rules_utils.check_rules()
     if None in [rules_content, user_id, dataset_config_id]:
         raise HTTPException(
             status_code=400,
             detail="Missing required fields in the request body",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if len(rules_check) > 0:
+        raise HTTPException(
+            status_code=404,
+            detail={"message": "Error while checking rules", "errors": rules_check},
             headers={"WWW-Authenticate": "Bearer"},
         )
     response = core_insert_or_update_rules_config(

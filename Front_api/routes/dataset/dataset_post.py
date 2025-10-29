@@ -31,6 +31,7 @@ with open("./utils/faker_list.json", "r") as f:
 
 MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL")
 API_KEY = os.getenv("API_KEY")  # À changer/environner en production !
+print("api key -->", API_KEY)
 # MICRO_SERVICE_URL = os.getenv("MICRO_SERVICE_URL",None)
 print("MICRO_SERVICE_URL:", MICRO_SERVICE_URL)
 if MICRO_SERVICE_URL is None:
@@ -68,41 +69,39 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
     nbRows = body.get("nbRows", 1)
     dataset_config_parent_id = body.get("dataset_parent_id", None)
     dataset_fields_list = body.get("dataset_fields_list", None)
-    function = body.get(
-        "function", "preprocessing_generation"
-    )  # description of the function to be executed on the celery queue
+    function = "preprocessing_generation"  # description of the function to be executed on the celery queue
     body_value_list = [userId, end_format, yamlContent, dataset_config_id, nbRows]
     # faker_name_dict = body.get("faker_name_dict" , [])
-    # print("--> faker_name_dict",faker_name_dict)
+    # # print("--> faker_name_dict",faker_name_dict)
 
-    faker_client_list = []
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{MICRO_SERVICE_URL}/faker_name_list_front/{userId}",
-            headers={"X-API-KEY": os.getenv("API_KEY")},
-        )
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
-        else:
-            faker_client_list = response.json()
+    # faker_client_list = []
+    # async with httpx.AsyncClient() as client:
+    #     response = await client.get(
+    #         f"{MICRO_SERVICE_URL}/faker_name_list_front/{userId}",
+    #         headers={"X-API-KEY": os.getenv("API_KEY")},
+    #     )
+    #     if response.status_code != 200:
+    #         raise HTTPException(status_code=response.status_code, detail=response.text)
+    #     else:
+    #         faker_client_list = response.json()
 
-    print("usefeeferId -->", userId)
-    # requete pour recuperer le nom des fakers disponibles pour le client
-    # pour que le set gloabal reste inchangé
-    set_faker_list_copy = set_faker_list.copy()
-    set_faker_list_copy.update(
-        faker_client_list
-    )  # list globale des noms de fonctions fakers client + de base
-    faker_name_dict: list = extract_all_faker_types(yamlContent)
+    # print("usefeeferId -->", userId)
+    # # requete pour recuperer le nom des fakers disponibles pour le client
+    # # pour que le set gloabal reste inchangé
+    # set_faker_list_copy = set_faker_list.copy()
+    # set_faker_list_copy.update(
+    #     faker_client_list
+    # )  # list globale des noms de fonctions fakers client + de base
+    # faker_name_dict: list = extract_all_faker_types(yamlContent)
 
-    missing_value = [elem for elem in faker_name_dict if elem not in set_faker_list]
-    if missing_value != []:
-        raise HTTPException(
-            status_code=400,
-            detail="Error while chechking faker name. A faker name is not exist add it to the faker_list.json file on a front missing_value : "
-            + str(missing_value),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # missing_value = [elem for elem in faker_name_dict if elem not in set_faker_list]
+    # if missing_value != []:
+    #     raise HTTPException(
+    #         status_code=400,
+    #         detail="Error while chechking faker name. A faker name is not exist add it to the faker_list.json file on a front missing_value : "
+    #         + str(missing_value),
+    #         headers={"WWW-Authenticate": "Bearer"},
+    #     )
 
     print("success")
 
@@ -135,7 +134,7 @@ async def generate_dataset(request: Request, userId: str = Depends(get_session_t
             yaml_content=yamlContent,
             rules=rulesContent,
             dataset_config=dataset_config_id,
-            faker_name_dict=faker_name_dict,
+            faker_name_dict=[],
             request_type="api",
             dataset_config_parent_id=dataset_config_parent_id,
             dataset_fields_list=dataset_fields_list
