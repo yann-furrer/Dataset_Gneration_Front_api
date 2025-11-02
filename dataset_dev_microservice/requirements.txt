@@ -1,5 +1,6 @@
 pydantic==2.10.3
 uvicorn==0.32.1
+uvicorn[standard]==0.24.0
 tqdm==4.67.1
 fastapi==0.115.6
 fastapi-cli==0.0.6
