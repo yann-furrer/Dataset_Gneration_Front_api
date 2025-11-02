@@ -6,13 +6,10 @@ import json
 
 load_dotenv()
 REDIS_URL = os.getenv("REDIS_URL")
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
-REDIS_USERNAME = os.getenv("REDIS_USERNAME")
-
 
 class RedisManager:
     def __init__(self):
-        self.r = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+        self.r = redis.Redis(host=REDIS_URL, decode_responses=True, password=None, ssl=True, ssl_cert_reqs="required")
 
     def set_value(self, key: str, value: dict) -> None:
         if self.r is not None:
@@ -34,3 +31,6 @@ class RedisManager:
     def delete(self, key: str) -> None:
         if self.r is not None:
             self.r.delete(key)
+
+redis_manager = RedisManager()
+redis_manager.set_value("test", {"test": "test"})
