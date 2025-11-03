@@ -1,4 +1,5 @@
 from utils.aws_secret import create_env_file_from_secret
+print("load aws secret")
 create_env_file_from_secret()
 from routes.dev_token import dev_token_get, dev_token_post, dev_token_delete
 from routes.dataset import dataset_post, dataset_get, dataset_put
