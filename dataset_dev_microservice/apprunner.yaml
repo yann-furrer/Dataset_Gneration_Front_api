@@ -10,7 +10,7 @@ run:
     - python3 -m pip install --upgrade pip
     - python3 -m pip install -r requirements.txt
   runtime-version: 3.11
-  command: python3 main.py
+  command: python3 dataset_dev_microservice/main.py
   network:
     port: 8000
     env: PORT
