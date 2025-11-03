@@ -9,7 +9,6 @@ run:
   pre-run:
     - python3 -m pip install --upgrade pip
     - python3 -m pip install -r requirements.txt
-    - python3 utils/aws_secret.py
   runtime-version: 3.11
   command: python3 main.py
   network:

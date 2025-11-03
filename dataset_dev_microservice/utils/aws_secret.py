@@ -60,5 +60,3 @@ def create_env_file_from_secret():
 
     print("✅ Fichier .env créé avec succès")
 
-print("test")
-create_env_file_from_secret()
