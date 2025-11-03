@@ -171,3 +171,7 @@ app.include_router(rules_config_put.router)
 app.include_router(rules_config_delete.router)
 app.include_router(rules_config_get.router)
 
+if __name__ == "__main__":
+    import uvicorn
+    print("Starting dev dataset api...")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
