@@ -1,7 +1,7 @@
 import json, yaml, re
 
 # Ouvre la liste des types fakers
-with open("dataset_dev_microservice/core/fakerlist.json", "r") as f:
+with open("./core/fakerlist.json", "r") as f:
     faker_list = json.load(f)
     set_faker_list = set(faker_list)
 

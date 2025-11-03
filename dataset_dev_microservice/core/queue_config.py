@@ -1,8 +1,11 @@
 import pika
-import json, os, uuid
+import json, os, uuid, sys
+
 from typing import TypedDict, Optional
-from dotenv import load_dotenv
-load_dotenv()
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+from utils.env_handle import load_env_from_file
+load_env_from_file()
 
 CELERY_USER = os.getenv("CELERY_USER")
 CELERY_PASSWORD = os.getenv("CELERY_PASSWORD")
