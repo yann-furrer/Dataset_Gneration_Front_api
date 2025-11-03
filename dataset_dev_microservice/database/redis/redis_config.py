@@ -1,12 +1,12 @@
 import redis
 import os
+from dotenv import load_dotenv
 from fastapi import HTTPException
 import json
-import sys 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-from utils.env_handle import load_env_from_file
-load_env_from_file()
+
+load_dotenv()
 REDIS_URL = os.getenv("REDIS_URL")
+
 class RedisManager:
     def __init__(self):
         self.r = redis.Redis(host=REDIS_URL, decode_responses=True, password=None, ssl=True, ssl_cert_reqs="required")

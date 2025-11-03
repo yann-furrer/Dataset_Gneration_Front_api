@@ -1,5 +1,6 @@
 import os, sys, uuid
 from datetime import datetime
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Depends, Query
 from fastapi.security import HTTPBearer
 from database.queries.security import (
@@ -14,8 +15,7 @@ from database.queries.security import (
 )
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-from utils.env_handle import load_env_from_file
-load_env_from_file()
+load_dotenv()
 
 
 SECRET_KEY = os.getenv("SECRET_KEY")
