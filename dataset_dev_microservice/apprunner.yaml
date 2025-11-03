@@ -4,12 +4,12 @@ runtime: python311
 build:
   commands:
     build:
-      - pip install --upgrade pip
-      - pip install -r requirements.txt
+      - pip3 install --upgrade pip
+      - pip3 install -r requirements.txt
 
 run:
   runtime-version: 3.11
-  command: python -m uvicorn main:app --host 0.0.0.0 --port 8000
+  command: python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
   network:
     port: 8000
     env: APP_PORT
