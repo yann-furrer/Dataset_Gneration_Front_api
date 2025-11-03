@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 
+
 app = FastAPI()
 
 # Configuration CORS
@@ -171,5 +172,7 @@ app.include_router(rules_config_get.router)
 
 if __name__ == "__main__":
     import uvicorn
+ 
     print("Starting dev dataset api...")
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
