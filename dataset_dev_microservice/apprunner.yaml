@@ -1,11 +1,34 @@
+# version: 1.0
+# runtime: python311  # Changez de python3 à python311
+# build:
+#   commands:
+#     build:
+#       - pip3 install -r requirements.txt
+# run:
+#   runtime-version: 3.11  # Spécifiez la version exacte
+#   command: uvicorn main:app --host 0.0.0.0 --port 8080 --log-level debug
+#   network:
+#     port: 8080
+
+
 version: 1.0
-runtime: python311  # Changez de python3 à python311
-build:
-  commands:
-    build:
-      - pip3 install -r requirements.txt
+runtime: python311
 run:
-  runtime-version: 3.11  # Spécifiez la version exacte
-  command: uvicorn main:app --host 0.0.0.0 --port 8080 --log-level debug
+  runtime-version: 3.11
+  pre-run:
+    - echo "=== INFORMATIONS SYSTEME ==="
+    - python3 --version
+    - pip3 --version
+    - pwd
+    - ls -la
+    - echo "=== INSTALLATION DEPENDANCES ==="
+    - pip3 install fastapi uvicorn[standard] --verbose
+    - echo "=== TEST IMPORTS ==="
+    - python3 -c "import fastapi; print('FastAPI OK')"
+    - python3 -c "import uvicorn; print('Uvicorn OK')"
+    - echo "=== VERIFICATION FICHIERS ==="
+    - ls -la *.py
+    - echo "=== FIN PRE-RUN ==="
+  command: python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug
   network:
-    port: 8080
+    port: 8000
