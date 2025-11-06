@@ -6,6 +6,6 @@ build:
       - pip3 install -r requirements.txt
 run:
   runtime-version: 3.11  # Spécifiez la version exacte
-  command: uvicorn main:app --host 0.0.0.0 --port 8000
+  command: uvicorn main:app --host 0.0.0.0 --port 8000 --log-level debug
   network:
     port: 8000
