@@ -1,15 +1,15 @@
 from utils.aws_secret import create_env_file_from_secret
 print("load aws secret")
 create_env_file_from_secret()
-from routes.dev_token import dev_token_get, dev_token_post, dev_token_delete
-from routes.dataset import dataset_post, dataset_get, dataset_put
-from routes.dataset_config import (
-    dataset_config_get,
-    dataset_config_delete,
-    dataset_config_put,
-)
-from routes.rules_config import rules_config_put, rules_config_delete, rules_config_get
-from schema.dataset_shema import *
+# from routes.dev_token import dev_token_get, dev_token_post, dev_token_delete
+# from routes.dataset import dataset_post, dataset_get, dataset_put
+# from routes.dataset_config import (
+#     dataset_config_get,
+#     dataset_config_delete,
+#     dataset_config_put,
+# )
+# from routes.rules_config import rules_config_put, rules_config_delete, rules_config_get
+# from schema.dataset_shema import *
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -173,22 +173,22 @@ async def get_openapi_test():
 #     return full_schema
 
 
-app.include_router(dev_token_get.router)
-app.include_router(dev_token_post.router)
-app.include_router(dev_token_delete.router)
+# app.include_router(dev_token_get.router)
+# app.include_router(dev_token_post.router)
+# app.include_router(dev_token_delete.router)
 
-app.include_router(dataset_post.router)
-app.include_router(dataset_get.router)
-app.include_router(dataset_put.router)
+# app.include_router(dataset_post.router)
+# app.include_router(dataset_get.router)
+# app.include_router(dataset_put.router)
 
-# app.include_router(dataset_config_post.router)
-app.include_router(dataset_config_get.router)
-app.include_router(dataset_config_delete.router)
-app.include_router(dataset_config_put.router)
+# # app.include_router(dataset_config_post.router)
+# app.include_router(dataset_config_get.router)
+# app.include_router(dataset_config_delete.router)
+# app.include_router(dataset_config_put.router)
 
-app.include_router(rules_config_put.router)
-app.include_router(rules_config_delete.router)
-app.include_router(rules_config_get.router)
+# app.include_router(rules_config_put.router)
+# app.include_router(rules_config_delete.router)
+# app.include_router(rules_config_get.router)
 
 # if __name__ == "__main__":
 #     import uvicorn
