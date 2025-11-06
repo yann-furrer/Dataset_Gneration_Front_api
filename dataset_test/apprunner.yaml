@@ -1,10 +1,11 @@
 version: 1.0
-runtime: python3
+runtime: python311  # Changez de python3 à python311
 build:
   commands:
     build:
       - pip3 install -r requirements.txt
 run:
-  command: uvicorn main:app --host 0.0.0.0 --port 8080
+  runtime-version: 3.11  # Spécifiez la version exacte
+  command: uvicorn main:app --host 0.0.0.0 --port 8000
   network:
-    port: 8080
+    port: 8000
