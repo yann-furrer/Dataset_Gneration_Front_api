@@ -21,10 +21,9 @@ run:
   runtime-version: 3.11
   pre-run:  
     - pip3 install pipenv
-    - pipenv install --system
+    - pipenv requirements > requirements.txt
+    - pip3 install -r requirements.txt
   command: python3 main.py
   network: 
-    port: 8000
-  env:
-    - name: PORT
-      value: "8000"
+    port: 8080
+
