@@ -57,6 +57,10 @@ app.add_middleware(
 )
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 # route api personnalisée
 @app.get("/dataset-api", include_in_schema=False)
 async def get_dataset_docs():
