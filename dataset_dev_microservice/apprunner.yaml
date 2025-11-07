@@ -12,7 +12,7 @@ run:
   pre-run:  
     - pip3 install pipenv
     - pipenv install
-  command: python3 main.py
+  command: pipenv run main.py
   network: 
     port: 8080
   
