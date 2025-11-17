@@ -6,7 +6,6 @@ import json
 
 load_dotenv()
 REDIS_URL = os.getenv("REDIS_URL")
-
 class RedisManager:
     def __init__(self):
         self.r = redis.Redis(host=REDIS_URL, decode_responses=True, password=None, ssl=True, ssl_cert_reqs="required")
