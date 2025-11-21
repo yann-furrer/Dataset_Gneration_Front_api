@@ -1,6 +1,6 @@
 from utils.aws_secret import create_env_file_from_secret
 print("load aws secret")
-create_env_file_from_secret()
+# create_env_file_from_secret()
 from routes.dev_token import dev_token_get, dev_token_post, dev_token_delete
 from routes.dataset import dataset_post, dataset_get, dataset_put
 from routes.dataset_config import (
@@ -17,24 +17,24 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from contextlib import asynccontextmanager
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Code exécuté au démarrage
-    print("Loading AWS secrets...")
-    try:
-        from utils.aws_secret import create_env_file_from_secret
-        create_env_file_from_secret()
-        print("AWS secrets loaded successfully")
-    except Exception as e:
-        print(f"Error loading secrets: {e}")
-        # Selon ton besoin, tu peux raise l'erreur ou continuer
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # Code exécuté au démarrage
+#     print("Loading AWS secrets...")
+#     try:
+#         from utils.aws_secret import create_env_file_from_secret
+#         create_env_file_from_secret()
+#         print("AWS secrets loaded successfully")
+#     except Exception as e:
+#         print(f"Error loading secrets: {e}")
+#         # Selon ton besoin, tu peux raise l'erreur ou continuer
     
-    yield
+#     yield
     
-    # Code exécuté à l'arrêt (si nécessaire)
-    print("Shutting down...")
+#     # Code exécuté à l'arrêt (si nécessaire)
+#     print("Shutting down...")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 # Configuration CORS
 
